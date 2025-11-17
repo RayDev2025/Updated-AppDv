@@ -1,0 +1,222 @@
+﻿@model UserRoles.Models.Enrollment
+
+@{
+    ViewData["Title"] = "Edit Enrollment Application";
+}
+
+<link rel="stylesheet" href="~/css/professional-style.css" />
+
+<div class="hero-banner" style="background-image: url('/images/school-building.jpg'); min-height: 350px;">
+    <div class="hero-content">
+        <h1>Edit Enrollment Application</h1>
+        <p>Update your enrollment information below</p>
+    </div>
+</div>
+
+<div class="content-wrapper">
+    <div class="section-standard animate-fade-in">
+        <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+            <h3 style="color: #856404; margin: 0 0 10px 0;">
+                <i class="fas fa-exclamation-triangle"></i> Edit Mode
+            </h3>
+            <p style="color: #856404; margin: 0;">
+                You are editing your enrollment application. Changes will be saved when you click "Update Enrollment".
+                <br><strong>Note:</strong> You can only edit your application while it's in "Pending" status.
+            </p>
+        </div>
+
+        <h2 class="section-title">Edit Enrollment Form</h2>
+        <p class="section-subtitle">Update any information that needs to be changed (*required fields)</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert-box" style="background: #f8d7da; border-color: #dc3545; color: #721c24;">
+                <strong>⚠️ Error:</strong> @TempData["Error"]
+            </div>
+        }
+
+        <form asp-action="UpdateEnrollment" method="post" enctype="multipart/form-data" class="form-modern">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="EnrollmentDate" />
+            <input type="hidden" asp-for="Status" />
+
+            <div class="form-group-modern">
+                <label asp-for="StudentName">Student Full Name *</label>
+                <input asp-for="StudentName" class="form-control-modern" placeholder="Enter student's complete name" required />
+                <span asp-validation-for="StudentName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="GradeLevel">Grade Level *</label>
+                <select asp-for="GradeLevel" class="form-control-modern" required>
+                    <option value="">-- Select Grade Level --</option>
+                    <option value="1">Grade 1</option>
+                    <option value="2">Grade 2</option>
+                    <option value="3">Grade 3</option>
+                    <option value="4">Grade 4</option>
+                    <option value="5">Grade 5</option>
+                    <option value="6">Grade 6</option>
+                </select>
+                <span asp-validation-for="GradeLevel" class="text-danger"></span>
+                <span class="file-info-text">⚠️ Changing grade level will reassign your section</span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="ParentName">Parent/Guardian Name *</label>
+                <input asp-for="ParentName" class="form-control-modern" placeholder="Enter parent or guardian's name" required />
+                <span asp-validation-for="ParentName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="ContactNumber">Contact Number *</label>
+                <input asp-for="ContactNumber" class="form-control-modern" pattern="[0-9]{11}" placeholder="09XXXXXXXXX" required />
+                <span class="file-info-text">Format: 11 digits (e.g., 09171234567)</span>
+                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="Address">Complete Address *</label>
+                <textarea asp-for="Address" class="form-control-modern" rows="3" placeholder="Enter complete home address" required></textarea>
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label>Birth Certificate (PDF only)</label>
+                <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>Current file:</strong>
+                    <a href="@Model.BirthCertificate" target="_blank" style="color: #007bff; text-decoration: none;">
+                        <i class="fas fa-file-pdf"></i> View Current Birth Certificate
+                    </a>
+                </div>
+                <div class="file-upload-modern">
+                    <div class="file-upload-label" id="birthCertLabel">
+                        📎 Click to Upload New Birth Certificate (Optional)
+                    </div>
+                    <input type="file" name="birthCertFile" id="birthCertFile" accept=".pdf" />
+                </div>
+                <span class="file-info-text">Leave empty to keep current file | Maximum: 5MB | Format: PDF</span>
+            </div>
+
+            <div class="form-group-modern">
+                <label>Form 137 (PDF only)</label>
+                <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>Current file:</strong>
+                    <a href="@Model.Form137" target="_blank" style="color: #007bff; text-decoration: none;">
+                        <i class="fas fa-file-pdf"></i> View Current Form 137
+                    </a>
+                </div>
+                <div class="file-upload-modern">
+                    <div class="file-upload-label" id="form137Label">
+                        📎 Click to Upload New Form 137 (Optional)
+                    </div>
+                    <input type="file" name="form137File" id="form137File" accept=".pdf" />
+                </div>
+                <span class="file-info-text">Leave empty to keep current file | Maximum: 5MB | Format: PDF</span>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button type="submit" class="btn-modern btn-success" style="flex: 1; font-size: 1.1em; padding: 15px;">
+                     UPDATE ENROLLMENT
+                </button>
+                <a href="@Url.Action("ViewEnrollment", "Student")" class="btn-modern btn-secondary" style="flex: 1; font-size: 1.1em; padding: 15px; text-align: center; text-decoration: none;">
+                    ❌ CANCEL
+                </a>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;">
+            <p style="color: #666; margin-bottom: 15px;">Need to start over completely?</p>
+            <button type="button" onclick="confirmReset()" class="btn-modern" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 12px 30px;">
+                🔄 RESET ENROLLMENT
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div id="resetModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+    <div style="position: relative; margin: 10% auto; padding: 30px; background: white; max-width: 500px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <h3 style="color: #dc3545; margin: 0 0 20px 0;">
+            <i class="fas fa-exclamation-triangle"></i> Confirm Reset
+        </h3>
+        <p style="font-size: 1.1em; color: #333; margin-bottom: 20px;">
+            Are you sure you want to reset your enrollment application?
+        </p>
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: #856404;">⚠️ Warning:</strong>
+            <ul style="margin: 10px 0 0 20px; color: #856404;">
+                <li>All your enrollment information will be deleted</li>
+                <li>Uploaded documents will be removed</li>
+                <li>You will need to fill out the form again from scratch</li>
+                <li>This action cannot be undone</li>
+            </ul>
+        </div>
+
+        <form asp-action="ResetEnrollment" method="post" style="display: inline;">
+            @Html.AntiForgeryToken()
+            <button type="submit" style="background: #dc3545; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 10px;">
+                Yes, Reset Everything
+            </button>
+        </form>
+        <button onclick="closeResetModal()" style="background: #6c757d; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Cancel
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // File upload label updates
+        document.getElementById('birthCertFile').addEventListener('change', function () {
+            const label = document.getElementById('birthCertLabel');
+            if (this.files.length > 0) {
+                label.textContent = '✅ ' + this.files[0].name;
+                label.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            }
+        });
+
+        document.getElementById('form137File').addEventListener('change', function () {
+            const label = document.getElementById('form137Label');
+            if (this.files.length > 0) {
+                label.textContent = '✅ ' + this.files[0].name;
+                label.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            }
+        });
+
+        // Reset modal functions
+        function confirmReset() {
+            document.getElementById('resetModal').style.display = 'block';
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('resetModal');
+            if (event.target == modal) {
+                closeResetModal();
+            }
+        }
+
+        // Confirm before leaving page with unsaved changes
+        let formChanged = false;
+        document.querySelector('form').addEventListener('change', function() {
+            formChanged = true;
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Don't show warning when submitting form
+        document.querySelector('form').addEventListener('submit', function() {
+            formChanged = false;
+        });
+    </script>
+}

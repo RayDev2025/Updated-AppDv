@@ -1,0 +1,523 @@
+﻿@model UserRoles.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --secondary: #8b5cf6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --dark: #1f2937;
+        --light: #f3f4f6;
+    }
+
+    body {
+        background: #f8fafc;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .dashboard-wrapper {
+        display: flex;
+        min-height: 100vh;
+        padding-left: 0; /* Removed sidebar offset */
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 0;
+        box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        position: relative; /* No longer fixed */
+        height: auto; /* Adjusts with content */
+    }
+
+    .sidebar-header {
+        padding: 25px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        text-align: center;
+    }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.6);
+        }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 20px 0;
+        margin: 0;
+    }
+
+        .sidebar-menu li {
+            margin: 5px 15px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+            .sidebar-menu a:hover,
+            .sidebar-menu a.active,
+            .sidebar-menu button:hover {
+                background: rgba(99, 102, 241, 0.2);
+                color: #fff;
+                transform: translateX(5px);
+            }
+
+        .sidebar-menu i {
+            margin-right: 12px;
+            width: 20px;
+            font-size: 1.1em;
+        }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        padding: 30px;
+        width: 100%;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+        .dashboard-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .dashboard-header .welcome-text {
+            color: #64748b;
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+    .stat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .stat-card-title {
+        font-size: 0.9em;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+    }
+
+    .stat-card-value {
+        font-size: 2.5em;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 10px 0;
+    }
+
+    .stat-card-footer {
+        font-size: 0.85em;
+        color: #64748b;
+    }
+
+    /* Chart Cards */
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 24px;
+        margin-bottom: 30px;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+    }
+
+        .chart-card h3 {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+    /* Recent Enrollments Table */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+    }
+
+        .table-card h3 {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .modern-table th {
+            background: #f8fafc;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .modern-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .modern-table tr:hover {
+            background: #f8fafc;
+        }
+
+    .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    @@media (max-width: 768px) {
+        .sidebar
+
+    {
+        width: 70px;
+    }
+
+    .sidebar-menu span {
+        display: none;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>🎓 Admin Panel</h3>
+            <p>Elementary School</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="@Url.Action("Dashboard", "Admin")" class="active"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+            <li><a href="@Url.Action("ViewStudents", "Admin")"><i class="fas fa-user-graduate"></i><span>Students</span></a></li>
+            <li><a href="@Url.Action("ManageProfessors", "Admin")"><i class="fas fa-chalkboard-teacher"></i><span>Professors</span></a></li>
+            <li><a href="@Url.Action("ManageSections", "Admin")"><i class="fas fa-door-open"></i><span>Sections</span></a></li>
+            <li><a href="@Url.Action("ClassSchedules", "Admin")"><i class="fas fa-clock"></i><span>Class Schedules</span></a></li>
+            <li><a href="@Url.Action("Index", "Home")"><i class="fas fa-home"></i><span>Home</span></a></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" style="width: 100%; text-align: left; background: none; border: none; color: inherit; padding: 12px 15px; cursor: pointer; display: flex; align-items: center; font: inherit; border-radius: 8px; transition: all 0.3s ease;">
+                        <i class="fas fa-sign-out-alt" style="margin-right: 12px; width: 20px; font-size: 1.1em;"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="dashboard-header">
+            <div>
+                <h1>Dashboard Overview</h1>
+                <p class="welcome-text">Welcome back, @User.Identity.Name</p>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">Total Students</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">@Model.TotalStudents</div>
+                <div class="stat-card-footer">Enrolled students</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">Pending Enrollments</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">@Model.PendingEnrollments</div>
+                <div class="stat-card-footer">Awaiting approval</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">Total Professors</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">@Model.TotalProfessors</div>
+                <div class="stat-card-footer">Active faculty</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">Total Sections</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">@Model.TotalSections</div>
+                <div class="stat-card-footer">Across all grades</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>Students per Grade Level</h3>
+                <canvas id="studentsChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Professors per Grade Level</h3>
+                <canvas id="professorsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Enrollments -->
+        <div class="table-card">
+            <h3>Recent Enrollment Applications</h3>
+            @if (Model.RecentEnrollments.Any())
+            {
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Grade Level</th>
+                            <th>Parent/Guardian</th>
+                            <th>Date Applied</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var enrollment in Model.RecentEnrollments)
+                        {
+                            <tr>
+                                <td><strong>@enrollment.StudentName</strong></td>
+                                <td>Grade @enrollment.GradeLevel</td>
+                                <td>@enrollment.ParentName</td>
+                                <td>@enrollment.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    @if (enrollment.Status == "pending")
+                                    {
+                                        <span class="badge badge-warning">Pending</span>
+                                    }
+                                    else if (enrollment.Status == "approved")
+                                    {
+                                        <span class="badge badge-success">Approved</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Rejected</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("ViewStudents", "Admin")" style="color: var(--primary); text-decoration: none; font-weight: 600;">View Details →</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p style="text-align: center; color: #64748b; padding: 40px;">No recent enrollments</p>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    // Students per Grade Level Chart
+    const studentsCtx = document.getElementById('studentsChart').getContext('2d');
+    new Chart(studentsCtx, {
+        type: 'bar',
+        data: {
+            labels: [@Html.Raw(string.Join(",", Model.StudentsPerGradeLevel.Select(s => $"'Grade {s.GradeLevel}'")))],
+            datasets: [{
+                label: 'Number of Students',
+                data: [@Html.Raw(string.Join(",", Model.StudentsPerGradeLevel.Select(s => s.StudentCount)))],
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Professors per Grade Level Chart
+    const professorsCtx = document.getElementById('professorsChart').getContext('2d');
+    new Chart(professorsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [@Html.Raw(string.Join(",", Model.ProfessorsPerGradeLevel.Select(p => $"'Grade {p.GradeLevel}'")))],
+            datasets: [{
+                data: [@Html.Raw(string.Join(",", Model.ProfessorsPerGradeLevel.Select(p => p.ProfessorCount)))],
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(251, 146, 60, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(59, 130, 246, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>

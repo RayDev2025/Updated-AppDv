@@ -1,0 +1,409 @@
+﻿@model UserRoles.Models.Enrollment
+
+@{
+    ViewData["Title"] = "My Enrollment Details";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    .enrollment-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    }
+
+    .enrollment-header {
+        text-align: center;
+        padding-bottom: 25px;
+        border-bottom: 3px solid #007bff;
+        margin-bottom: 30px;
+    }
+
+        .enrollment-header h2 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 1.1em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        color: #000;
+    }
+
+    .status-approved {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .status-rejected {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .detail-row {
+        display: flex;
+        padding: 18px 0;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.3s ease;
+    }
+
+        .detail-row:hover {
+            background: #f8f9fa;
+        }
+
+    .detail-label {
+        font-weight: 700;
+        width: 220px;
+        color: #555;
+        font-size: 1.05em;
+    }
+
+    .detail-value {
+        flex: 1;
+        color: #333;
+        font-size: 1.05em;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        flex: 1;
+        min-width: 180px;
+        padding: 15px 25px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1.05em;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        color: #000;
+    }
+
+        .btn-edit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+    .btn-reset {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+        .btn-reset:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+    .btn-print {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+    }
+
+        .btn-print:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+        }
+
+    .btn-logout {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+        .btn-logout:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+    .info-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #2196f3;
+        margin: 25px 0;
+    }
+
+        .info-box h4 {
+            margin: 0 0 10px 0;
+            color: #1565c0;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #0d47a1;
+            line-height: 1.6;
+        }
+
+    .warning-box {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffe9a6 100%);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #ffc107;
+        margin: 25px 0;
+    }
+
+        .warning-box h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+
+        .warning-box p {
+            margin: 0;
+            color: #856404;
+            line-height: 1.6;
+        }
+
+    .document-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .document-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+        }
+</style>
+
+<div class="enrollment-container">
+    <div class="enrollment-header">
+        <h2><i class="fas fa-file-alt"></i> My Enrollment Details</h2>
+        <div class="status-badge status-@Model.Status.ToLower()">
+            @if (Model.Status == "pending")
+            {
+                <i class="fas fa-clock"></i>
+            }
+            else if (Model.Status == "approved")
+            {
+                <i class="fas fa-check-circle"></i>
+            }
+            else
+            {
+                <i class="fas fa-times-circle"></i>
+            }
+            @Model.Status.ToUpper()
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: #d4edda; border: 2px solid #28a745; color: #155724;">
+            <strong><i class="fas fa-check-circle"></i> Success!</strong> @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: #f8d7da; border: 2px solid #dc3545; color: #721c24;">
+            <strong><i class="fas fa-exclamation-triangle"></i> Error!</strong> @TempData["Error"]
+        </div>
+    }
+
+    @if (Model.Status == "pending")
+    {
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> Your Application is Pending</h4>
+            <p>
+                Your enrollment application is currently being reviewed by the school administration.
+                <strong>While your application is pending, you can still edit or reset your information if needed.</strong>
+            </p>
+        </div>
+    }
+    else if (Model.Status == "approved")
+    {
+        <div class="info-box" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left-color: #28a745;">
+            <h4 style="color: #155724;"><i class="fas fa-check-circle"></i> Enrollment Approved!</h4>
+            <p style="color: #155724;">
+                Congratulations! Your enrollment has been approved. You can print your enrollment details for your records.
+                <strong>Note: You can no longer edit your application after approval.</strong>
+            </p>
+        </div>
+    }
+    else if (Model.Status == "rejected")
+    {
+        <div class="warning-box" style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); border-left-color: #dc3545;">
+            <h4 style="color: #721c24;"><i class="fas fa-times-circle"></i> Application Not Approved</h4>
+            <p style="color: #721c24;">
+                Unfortunately, your enrollment application was not approved. Please contact the school administration for more information.
+                <strong>Note: You can no longer edit your application after it has been processed.</strong>
+            </p>
+        </div>
+    }
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-user"></i> Student Name:</div>
+        <div class="detail-value"><strong>@Model.StudentName</strong></div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-graduation-cap"></i> Grade Level:</div>
+        <div class="detail-value">Grade @Model.GradeLevel</div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-door-open"></i> Section:</div>
+        <div class="detail-value">Section @Model.Section</div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-users"></i> Parent/Guardian:</div>
+        <div class="detail-value">@Model.ParentName</div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-phone"></i> Contact Number:</div>
+        <div class="detail-value">@Model.ContactNumber</div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Address:</div>
+        <div class="detail-value">@Model.Address</div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-calendar-alt"></i> Enrollment Date:</div>
+        <div class="detail-value">@Model.EnrollmentDate.ToString("MMMM dd, yyyy")</div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-label"><i class="fas fa-file-pdf"></i> Birth Certificate:</div>
+        <div class="detail-value">
+            <a href="@Model.BirthCertificate" target="_blank" class="document-link">
+                <i class="fas fa-eye"></i> View Document
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-row" style="border-bottom: none;">
+        <div class="detail-label"><i class="fas fa-file-pdf"></i> Form 137:</div>
+        <div class="detail-value">
+            <a href="@Model.Form137" target="_blank" class="document-link">
+                <i class="fas fa-eye"></i> View Document
+            </a>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        @if (Model.Status == "pending")
+        {
+            <a href="@Url.Action("EditEnrollment", "Student")" class="btn-action btn-edit">
+                <i class="fas fa-edit"></i> EDIT APPLICATION
+            </a>
+            <button type="button" onclick="confirmReset()" class="btn-action btn-reset">
+                <i class="fas fa-redo"></i> RESET APPLICATION
+            </button>
+        }
+
+        <a href="@Url.Action("PrintEnrollment", "Student")" class="btn-action btn-print" target="_blank">
+            <i class="fas fa-print"></i> PRINT DETAILS
+        </a>
+    </div>
+
+    @if (Model.Status == "pending")
+    {
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+            <p style="color: #666; margin: 0;">
+                <i class="fas fa-lightbulb"></i>
+                <strong>Tip:</strong> You can make changes to your application anytime before it's reviewed by clicking the "Edit Application" button above.
+            </p>
+        </div>
+    }
+</div>
+
+<!-- Reset Confirmation Modal -->
+@if (Model.Status == "pending")
+{
+    <div id="resetModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);">
+        <div style="position: relative; margin: 10% auto; padding: 35px; background: white; max-width: 550px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 style="color: #dc3545; margin: 0 0 20px 0; font-size: 1.6em;">
+                <i class="fas fa-exclamation-triangle"></i> Confirm Reset
+            </h3>
+            <p style="font-size: 1.15em; color: #333; margin-bottom: 20px; line-height: 1.6;">
+                Are you absolutely sure you want to reset your entire enrollment application?
+            </p>
+            <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid #ffc107;">
+                <strong style="color: #856404; font-size: 1.1em;"><i class="fas fa-exclamation-circle"></i> Warning - This Action Cannot Be Undone!</strong>
+                <ul style="margin: 15px 0 0 20px; color: #856404; line-height: 1.8;">
+                    <li>All your enrollment information will be permanently deleted</li>
+                    <li>Both uploaded documents (Birth Certificate and Form 137) will be removed</li>
+                    <li>Your assigned section will be released</li>
+                    <li>You will need to fill out the entire enrollment form again from scratch</li>
+                </ul>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <form asp-action="ResetEnrollment" method="post" style="flex: 1;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 14px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 1.05em; transition: all 0.3s ease;">
+                        <i class="fas fa-trash-alt"></i> Yes, Reset Everything
+                    </button>
+                </form>
+                <button onclick="closeResetModal()" style="flex: 1; background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; padding: 14px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 1.05em; transition: all 0.3s ease;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function confirmReset() {
+            document.getElementById('resetModal').style.display = 'block';
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('resetModal');
+            if (event.target == modal) {
+                closeResetModal();
+            }
+        }
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeResetModal();
+            }
+        });
+    </script>
+}

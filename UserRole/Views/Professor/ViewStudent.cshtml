@@ -1,0 +1,465 @@
+﻿@model UserRoles.Models.Enrollment
+@{
+    ViewData["Title"] = "Student Details";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --info: #3b82f6;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .details-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: #64748b;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+        .back-button:hover {
+            background: #475569;
+            transform: translateX(-5px);
+        }
+
+    .student-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .student-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3em;
+        font-weight: 700;
+        color: #667eea;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .student-header-info h1 {
+        margin: 0 0 10px 0;
+        font-size: 2.2em;
+    }
+
+    .student-header-info p {
+        margin: 5px 0;
+        opacity: 0.9;
+        font-size: 1.1em;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .status-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 24px;
+        margin-bottom: 30px;
+    }
+
+    .detail-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary);
+    }
+
+        .detail-card h3 {
+            margin: 0 0 20px 0;
+            color: #1f2937;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.95em;
+    }
+
+    .detail-value {
+        color: #1f2937;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .documents-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-top: 24px;
+    }
+
+        .documents-section h3 {
+            margin: 0 0 20px 0;
+            color: #1f2937;
+            font-size: 1.3em;
+        }
+
+    .documents-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .document-card {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+        .document-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+    .document-icon {
+        font-size: 3em;
+        color: #ef4444;
+        margin-bottom: 10px;
+    }
+
+    .document-title {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+
+    .btn-view-doc {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+    }
+
+        .btn-view-doc:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+    .timeline-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-top: 24px;
+    }
+
+        .timeline-section h3 {
+            margin: 0 0 20px 0;
+            color: #1f2937;
+            font-size: 1.3em;
+        }
+
+    .timeline-item {
+        display: flex;
+        gap: 20px;
+        padding: 15px 0;
+        border-left: 3px solid var(--primary);
+        padding-left: 20px;
+        margin-left: 10px;
+        position: relative;
+    }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 20px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--primary);
+        }
+
+    .timeline-date {
+        font-weight: 700;
+        color: var(--primary);
+        min-width: 120px;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    .timeline-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 5px;
+    }
+
+    .timeline-description {
+        color: #64748b;
+        font-size: 0.9em;
+    }
+
+    .print-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: var(--success);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+        .print-button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    @@media print {
+        .back-button, .print-button, .btn-view-doc
+
+    {
+        display: none;
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .student-header
+
+    {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    }
+</style>
+
+<div class="details-container">
+    <a href="@Url.Action("Dashboard", "Professor")" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="student-header">
+        <div class="student-avatar">
+            @Model.StudentName.Substring(0, 1).ToUpper()
+        </div>
+        <div class="student-header-info">
+            <h1>@Model.StudentName</h1>
+            <p><i class="fas fa-school"></i> Grade @Model.GradeLevel - Section @Model.Section</p>
+            <p><i class="fas fa-calendar-alt"></i> Enrolled: @Model.EnrollmentDate.ToString("MMMM dd, yyyy")</p>
+            <span class="status-badge status-approved">
+                <i class="fas fa-check-circle"></i> @Model.Status.ToUpper()
+            </span>
+        </div>
+    </div>
+
+    <div class="details-grid">
+        <!-- Personal Information -->
+        <div class="detail-card" style="border-left-color: #667eea;">
+            <h3>
+                <i class="fas fa-user"></i> Personal Information
+            </h3>
+            <div class="detail-row">
+                <span class="detail-label">Full Name</span>
+                <span class="detail-value">@Model.StudentName</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Grade Level</span>
+                <span class="detail-value">Grade @Model.GradeLevel</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Section</span>
+                <span class="detail-value">Section @Model.Section</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Enrollment Date</span>
+                <span class="detail-value">@Model.EnrollmentDate.ToString("MMM dd, yyyy")</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status</span>
+                <span class="detail-value" style="color: #10b981;">@Model.Status.ToUpper()</span>
+            </div>
+        </div>
+
+        <!-- Guardian Information -->
+        <div class="detail-card" style="border-left-color: #f59e0b;">
+            <h3>
+                <i class="fas fa-users"></i> Guardian Information
+            </h3>
+            <div class="detail-row">
+                <span class="detail-label">Parent/Guardian Name</span>
+                <span class="detail-value">@Model.ParentName</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Contact Number</span>
+                <span class="detail-value">@Model.ContactNumber</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Email Address</span>
+                <span class="detail-value">@Model.User?.Email</span>
+            </div>
+        </div>
+
+        <!-- Address Information -->
+        <div class="detail-card" style="border-left-color: #10b981;">
+            <h3>
+                <i class="fas fa-map-marker-alt"></i> Address Information
+            </h3>
+            <div class="detail-row">
+                <span class="detail-label">Complete Address</span>
+                <span class="detail-value" style="text-align: right; max-width: 60%;">@Model.Address</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Section -->
+    <div class="documents-section">
+        <h3><i class="fas fa-folder-open"></i> Student Documents</h3>
+        <div class="documents-grid">
+            <div class="document-card">
+                <div class="document-icon">
+                    <i class="far fa-file-pdf"></i>
+                </div>
+                <div class="document-title">Birth Certificate</div>
+                <div style="color: #64748b; font-size: 0.85em; margin-bottom: 10px;">
+                    Official birth certificate document
+                </div>
+                <a href="@Model.BirthCertificate" target="_blank" class="btn-view-doc">
+                    <i class="fas fa-eye"></i> View Document
+                </a>
+            </div>
+
+            <div class="document-card">
+                <div class="document-icon">
+                    <i class="far fa-file-pdf"></i>
+                </div>
+                <div class="document-title">Form 137</div>
+                <div style="color: #64748b; font-size: 0.85em; margin-bottom: 10px;">
+                    Student permanent record
+                </div>
+                <a href="@Model.Form137" target="_blank" class="btn-view-doc">
+                    <i class="fas fa-eye"></i> View Document
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="timeline-section">
+        <h3><i class="fas fa-history"></i> Enrollment Timeline</h3>
+
+        <div class="timeline-item">
+            <div class="timeline-date">@Model.EnrollmentDate.ToString("MMM dd, yyyy")</div>
+            <div class="timeline-content">
+                <div class="timeline-title">Enrollment Submitted</div>
+                <div class="timeline-description">Student enrollment application was submitted by parent/guardian</div>
+            </div>
+        </div>
+
+        @if (Model.Status == "approved")
+        {
+            <div class="timeline-item">
+                <div class="timeline-date">@Model.EnrollmentDate.AddDays(1).ToString("MMM dd, yyyy")</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">Enrollment Approved</div>
+                    <div class="timeline-description">Application was reviewed and approved by administrator</div>
+                </div>
+            </div>
+
+            @if (Model.Section.HasValue)
+            {
+                <div class="timeline-item">
+                    <div class="timeline-date">@Model.EnrollmentDate.AddDays(1).ToString("MMM dd, yyyy")</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Section Assigned</div>
+                        <div class="timeline-description">Student was assigned to Grade @Model.GradeLevel - Section @Model.Section</div>
+                    </div>
+                </div>
+            }
+
+            <div class="timeline-item">
+                <div class="timeline-date">@DateTime.Now.ToString("MMM dd, yyyy")</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">Currently Enrolled</div>
+                    <div class="timeline-description">Student is actively enrolled for School Year @DateTime.Now.Year - @(DateTime.Now.Year + 1)</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <button onclick="window.print()" class="print-button">
+        <i class="fas fa-print"></i> Print Student Details
+    </button>
+</div>

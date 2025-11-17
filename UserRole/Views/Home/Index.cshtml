@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<link rel="stylesheet" href="~/css/professional-style.css" />
+
+<div class="hero-banner" style="padding:60px 0; background: url('/images/school-building.jpg') center/cover no-repeat; position: relative;">
+
+    <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.35);"></div>
+
+    <div style="position: relative; z-index:2; background: rgba(255,255,255,0.05); padding:40px; border-radius:16px; max-width:800px; margin:auto; text-align: center;">
+        <h1 style="color:#fff; font-size:3em; margin-bottom:0.3em; text-shadow: 2px 2px 6px rgba(0,0,0,0.6);">
+            Fort Bonifacio Elementary School
+        </h1>
+        <p style="color:#fff; font-size:1.3em; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">
+            Nurturing Excellence and Character — One Learner at a Time
+        </p>
+
+        <div style="margin-top: 40px;">
+            <h2 style="color:#fff; font-size:1.8em; margin-bottom:20px; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">
+                Start Your Application at<br />Elementary School Enrollment System
+            </h2>
+            <p style="color:#fff; font-size:1.15em; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">
+                Experience quality education! Explore our programs and enroll online through our admissions portal.
+            </p>
+
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <div style="margin-top: 30px;">
+                    <a href="@Url.Action("Login", "Account")" class="btn-modern btn-primary-red" style="margin-right: 10px;">LOGIN</a>
+                    <a href="@Url.Action("Register", "Account")" class="btn-modern btn-white">REGISTER NOW</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="content-wrapper">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="section-standard animate-fade-in">
+            <h2 class="section-title">Welcome, @User.Identity.Name!</h2>
+            <p class="section-subtitle">You are successfully logged in to the enrollment system.</p>
+
+            @{
+                var role = Context.Session.GetString("Role");
+                bool hasEnrollment = ViewBag.HasEnrollment ?? false;
+            }
+
+            @if (role == "student")
+            {
+                <div class="card-container">
+                    @if (!hasEnrollment)
+                    {
+                        <div class="card-professional">
+                            <span class="card-icon">📝</span>
+                            <h3>Start Enrollment</h3>.
+                            <p>Begin your enrollment process by filling out the application form and uploading required documents.</p>
+                            <a href="@Url.Action("EnrollmentForm", "Student")" class="btn-modern btn-success">ENROLL NOW</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-professional">
+                            <span class="card-icon">📄</span>
+                            <h3>View Enrollment</h3>
+                            <p>Check your enrollment status, view submitted documents, and print your enrollment details.</p>
+                            <a href="@Url.Action("ViewEnrollment", "Student")" class="btn-modern btn-info">VIEW DETAILS</a>
+                        </div>
+                    }
+                    <div class="card-professional">
+                        <span class="card-icon">📚</span>
+                        <h3>Requirements</h3>
+                        <p>Make sure you have all necessary documents: Birth Certificate and Form 137 (PDF format).</p>
+                        <a href="#" class="btn-modern btn-info" style="background: #6c757d;">LEARN MORE</a>
+                    </div>
+                </div>
+            }
+            else if (role == "admin")
+            {
+                <div class="card-container">
+                    <div class="card-professional">
+                        <span class="card-icon">📊</span>
+                        <h3>Dashboard</h3>
+                        <p>View enrollment statistics, pending applications, and system overview.</p>
+                        <a href="@Url.Action("Dashboard", "Admin")" class="btn-modern btn-primary-red">DASHBOARD</a>
+                    </div>
+
+                    <div class="card-professional">
+                        <span class="card-icon">👥</span>
+                        <h3>Manage Students</h3>
+                        <p>View all enrolled students, edit records, and manage section assignments.</p>
+                        <a href="@Url.Action("ViewStudents", "Admin")" class="btn-modern btn-success">MANAGE</a>
+                    </div>
+
+                    <div class="card-professional">
+                        <span class="card-icon">📋</span>
+                        <h3>Reports</h3>
+                        <p>Generate enrollment reports, statistics, and export student data.</p>
+                        <a href="#" class="btn-modern btn-info">REPORTS</a>
+                    </div>
+                </div>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="alert-box alert-info" style="margin-top: 40px;">
+                    <h3>🎛️ Administrator Access</h3>
+                    <p>You have full administrator privileges to manage the enrollment system.</p>
+                    <a href="@Url.Action("Admin", "Home")" class="btn-modern btn-info">Go to Admin Panel</a>
+                </div>
+            }
+
+            @if (User.IsInRole("User"))
+            {
+                <div class="alert-box alert-success" style="margin-top: 40px;">
+                    <h3>✅ User Access</h3>
+                    <p>Welcome! You can access all student enrollment features.</p>
+                    <a href="@Url.Action("User", "Home")" class="btn-modern btn-success">Go to User Area</a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="section-standard animate-fade-in">
+            <h2 class="section-title">Application Guidelines</h2>
+            <p class="section-subtitle">Everything you need to know about enrolling in our elementary school</p>
+
+            <div class="card-container">
+                <div class="card-professional">
+                    <span class="card-icon">📋</span>
+                    <h3>Requirements</h3>
+                    <p>Prepare your Birth Certificate and Form 137 in PDF format. Maximum file size: 5MB per document.</p>
+                </div>
+
+                <div class="card-professional">
+                    <span class="card-icon">📝</span>
+                    <h3>How to Apply</h3>
+                    <p>Register an account, fill out the enrollment form, upload documents, and submit your application online.</p>
+                </div>
+
+                <div class="card-professional">
+                    <span class="card-icon">✅</span>
+                    <h3>Next Steps</h3>
+                    <p>After submission, you can view your enrollment status and print your enrollment details anytime.</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 50px;">
+                <h3 style="color: var(--dark-blue); font-size: 1.8em; margin-bottom: 20px;">Ready to Begin?</h3>
+                <p style="font-size: 1.2em; color: #6c757d; margin-bottom: 30px;">
+                    Please <a href="@Url.Action("Login", "Account")" style="color: var(--primary-red); font-weight: 700; text-decoration: none;">login</a>
+                    or <a href="@Url.Action("Register", "Account")" style="color: var(--dark-blue); font-weight: 700; text-decoration: none;">register</a>
+                    to access the enrollment system.
+                </p>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,34 @@
+﻿@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="alert alert-warning">
+    <strong>Admin Only:</strong> This page is only accessible to administrators.
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>User Management</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage users and their roles.</p>
+                <button class="btn btn-primary">Manage Users</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>System Settings</h4>
+            </div>
+            <div class="card-body">
+                <p>Configure system settings.</p>
+                <button class="btn btn-secondary">System Config</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,123 @@
+﻿@model UserRoles.Models.Enrollment
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Enrollment Details - Print</title>
+    <style>
+        @@media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #333;
+            padding-bottom: 20px;
+        }
+
+            .header h1 {
+                margin: 0;
+                color: #333;
+            }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .detail-table td {
+                padding: 12px;
+                border: 1px solid #ddd;
+            }
+
+                .detail-table td:first-child {
+                    font-weight: bold;
+                    background: #f5f5f5;
+                    width: 200px;
+                }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .btn-print {
+            background: #007bff;
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="btn-print no-print">Print This Page</button>
+
+    <div class="header">
+        <h1>ELEMENTARY SCHOOL</h1>
+        <p>Enrollment Details</p>
+        <p>School Year: @DateTime.Now.Year - @(DateTime.Now.Year + 1)</p>
+    </div>
+
+    <table class="detail-table">
+        <tr>
+            <td>Student Name</td>
+            <td>@Model.StudentName</td>
+        </tr>
+        <tr>
+            <td>Grade Level</td>
+            <td>Grade @Model.GradeLevel</td>
+        </tr>
+        <tr>
+            <td>Section</td>
+            <td>Section @Model.Section</td>
+        </tr>
+        <tr>
+            <td>Parent/Guardian Name</td>
+            <td>@Model.ParentName</td>
+        </tr>
+        <tr>
+            <td>Contact Number</td>
+            <td>@Model.ContactNumber</td>
+        </tr>
+        <tr>
+            <td>Complete Address</td>
+            <td>@Model.Address</td>
+        </tr>
+        <tr>
+            <td>Enrollment Date</td>
+            <td>@Model.EnrollmentDate.ToString("MMMM dd, yyyy")</td>
+        </tr>
+        <tr>
+            <td>Status</td>
+            <td>@Model.Status.ToUpper()</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        <p>This is an official enrollment record generated on @DateTime.Now.ToString("MMMM dd, yyyy h:mm tt")</p>
+        <p>Please keep this for your records</p>
+    </div>
+</body>
+</html>

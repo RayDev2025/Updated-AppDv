@@ -1,0 +1,120 @@
+﻿@model UserRoles.Models.Enrollment
+
+@{
+    ViewData["Title"] = "Student Enrollment Form";
+}
+
+<link rel="stylesheet" href="~/css/professional-style.css" />
+
+<div class="hero-banner" style="background-image: url('/images/school-building.jpg'); min-height: 350px;">
+    <div class="hero-content">
+        <h1>Student Enrollment Application</h1>
+        <p>Complete the form below to enroll in our elementary school</p>
+    </div>
+</div>
+
+<div class="content-wrapper">
+    <div class="section-standard animate-fade-in">
+        <h2 class="section-title">Enrollment Form</h2>
+        <p class="section-subtitle">Please fill out all required fields marked with (*)</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert-box" style="background: #f8d7da; border-color: #dc3545; color: #721c24;">
+                <strong>⚠️ Error:</strong> @TempData["Error"]
+            </div>
+        }
+
+        <form asp-action="ProcessEnrollment" method="post" enctype="multipart/form-data" class="form-modern">
+
+            <div class="form-group-modern">
+                <label asp-for="StudentName">Student Full Name *</label>
+                <input asp-for="StudentName" class="form-control-modern" placeholder="Enter student's complete name" required />
+                <span asp-validation-for="StudentName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="GradeLevel">Grade Level *</label>
+                <select asp-for="GradeLevel" class="form-control-modern" required>
+                    <option value="">-- Select Grade Level --</option>
+                    <option value="1">Grade 1</option>
+                    <option value="2">Grade 2</option>
+                    <option value="3">Grade 3</option>
+                    <option value="4">Grade 4</option>
+                    <option value="5">Grade 5</option>
+                    <option value="6">Grade 6</option>
+                </select>
+                <span asp-validation-for="GradeLevel" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="ParentName">Parent/Guardian Name *</label>
+                <input asp-for="ParentName" class="form-control-modern" placeholder="Enter parent or guardian's name" required />
+                <span asp-validation-for="ParentName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="ContactNumber">Contact Number *</label>
+                <input asp-for="ContactNumber" class="form-control-modern" pattern="[0-9]{11}" placeholder="09XXXXXXXXX" required />
+                <span class="file-info-text">Format: 11 digits (e.g., 09171234567)</span>
+                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="Address">Complete Address *</label>
+                <textarea asp-for="Address" class="form-control-modern" rows="3" placeholder="Enter complete home address" required></textarea>
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label>Birth Certificate (PDF only) *</label>
+                <div class="file-upload-modern">
+                    <div class="file-upload-label" id="birthCertLabel">
+                        📎 Click to Upload Birth Certificate
+                    </div>
+                    <input type="file" name="birthCertFile" id="birthCertFile" accept=".pdf" required />
+                </div>
+                <span class="file-info-text">Maximum file size: 5MB | Format: PDF</span>
+            </div>
+
+            <div class="form-group-modern">
+                <label>Form 137 (PDF only) *</label>
+                <div class="file-upload-modern">
+                    <div class="file-upload-label" id="form137Label">
+                        📎 Click to Upload Form 137
+                    </div>
+                    <input type="file" name="form137File" id="form137File" accept=".pdf" required />
+                </div>
+                <span class="file-info-text">Maximum file size: 5MB | Format: PDF</span>
+            </div>
+
+            <button type="submit" class="btn-modern btn-success" style="width: 100%; font-size: 1.2em; padding: 18px; margin-top: 20px;">
+                SUBMIT ENROLLMENT APPLICATION
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a asp-action="Logout" asp-controller="Account" style="color: var(--primary-red); font-weight: 700; text-decoration: none; font-size: 1.1em;">← Back to Home</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('birthCertFile').addEventListener('change', function () {
+            const label = document.getElementById('birthCertLabel');
+            if (this.files.length > 0) {
+                label.textContent = '✅ ' + this.files[0].name;
+                label.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            }
+        });
+
+        document.getElementById('form137File').addEventListener('change', function () {
+            const label = document.getElementById('form137Label');
+            if (this.files.length > 0) {
+                label.textContent = '✅ ' + this.files[0].name;
+                label.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            }
+        });
+    </script>
+}

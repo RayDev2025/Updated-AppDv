@@ -1,0 +1,431 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Elementary School Enrollment</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/password-strength.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --primary-red: #c8102e;
+            --dark-blue: #003366;
+            --gold: #ffa500;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Modern Navigation */
+        .navbar-professional {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-blue) 100%) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+            padding: 12px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800 !important;
+            font-size: 1.4em !important;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link {
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            padding: 8px 15px !important;
+            border-radius: 5px;
+        }
+
+            .nav-link:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: translateY(-2px);
+            }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            min-height: calc(100vh - 400px);
+        }
+
+        /* Professional Footer */
+        .footer-professional {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            margin-top: 60px;
+            padding: 50px 0 0 0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffa500;
+            border-bottom: 2px solid #ffa500;
+            padding-bottom: 10px;
+        }
+
+        .footer-section p {
+            line-height: 1.7;
+            color: #ecf0f1;
+            font-size: 0.95em;
+        }
+
+        .footer-badge {
+            margin-top: 20px;
+            padding: 12px;
+            background: rgba(200, 16, 46, 0.2);
+            border: 2px solid #c8102e;
+            border-radius: 8px;
+            text-align: center;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+
+        .contact-list {
+            list-style: none;
+            padding: 0;
+        }
+
+            .contact-list li {
+                display: flex;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                gap: 15px;
+            }
+
+        .contact-icon {
+            font-size: 1.5em;
+            min-width: 30px;
+        }
+
+        .contact-list a {
+            color: #ffa500;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+            .contact-list a:hover {
+                color: #ffb733;
+                text-decoration: underline;
+            }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+            .footer-links li {
+                margin-bottom: 12px;
+            }
+
+            .footer-links a {
+                color: #ecf0f1;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                display: inline-block;
+            }
+
+                .footer-links a:hover {
+                    color: #ffa500;
+                    transform: translateX(5px);
+                }
+
+        .footer-info {
+            list-style: none;
+            padding: 0;
+            color: #ecf0f1;
+        }
+
+            .footer-info li {
+                margin-bottom: 8px;
+            }
+
+        .rating-badge {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(255, 165, 0, 0.1);
+            border: 2px solid #ffa500;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .star-icon {
+            font-size: 2.5em;
+        }
+
+        .rating-badge strong {
+            color: #ffa500;
+            display: block;
+            font-size: 1.1em;
+        }
+
+        .rating-badge small {
+            color: #bdc3c7;
+            font-size: 0.9em;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding: 25px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bdc3c7;
+            font-size: 0.95em;
+        }
+
+            .footer-bottom strong {
+                color: #ffa500;
+            }
+
+        @@media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-professional">
+            <div class="container-fluid">
+                <a class="navbar-brand text-white" asp-area="" asp-controller="Home" asp-action="Index">
+                    🏫 Elementary School
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation" style="background-color: white;">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Student" asp-action="AboutUs">About Us</a>
+                        </li>
+
+                        @* ENROLLMENT SYSTEM NAVIGATION *@
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            var role = Context.Session.GetString("Role");
+
+                            if (role == "student")
+                            {
+                                bool hasEnrollment = ViewBag.HasEnrollment ?? false;
+                                if (!hasEnrollment)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-controller="Student" asp-action="EnrollmentForm"> Enroll</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-controller="Student" asp-action="ViewEnrollment"> My Enrollment</a>
+                                    </li>
+                                }
+                            }
+                            else if (role == "admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Admin" asp-action="Dashboard"> Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Admin" asp-action="ViewStudents"> Students</a>
+                                </li>
+                            }
+                        }
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Admin">Admin</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("User"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="User">User</a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <span class="navbar-text text-white" style="margin-right: 10px;">Hello, @User.Identity.Name!</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="ChangePassword">🔐 Password</a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-link nav-link text-white" style="border: none; background: none;">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="main-content">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer-professional">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>About Elementary School</h3>
+                    <p>Providing quality education for young learners. Our mission is to nurture and develop every child's potential through innovative teaching methods and comprehensive curriculum.</p>
+                    <div class="footer-badge">
+                        FOR OFFICIAL PURPOSES ONLY
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contact Information</h3>
+                    <ul class="contact-list">
+                        <li>
+                            <span class="contact-icon">📍</span>
+                            <div>
+                                <strong>Page - Elementary School</strong><br />
+                                Fort Bonifacio, Taguig City
+                            </div>
+                        </li>
+                        <li>
+                            <span class="contact-icon">📞</span>
+                            <div>
+                                <strong>Phone:</strong><br />
+                                (02) 239 8307
+                            </div>
+                        </li>
+                        <li>
+                            <span class="contact-icon">✉️</span>
+                            <div>
+                                <strong>Email:</strong><br />
+                                <a href="mailto:fortbonifacio01@gmail.com">fortbonifacio01@@gmail.com</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                        <li><a href="@Url.Action("Privacy", "Home")">Privacy Policy</a></li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            var role = Context.Session.GetString("Role");
+                            if (role == "student")
+                            {
+                                <li><a href="@Url.Action("EnrollmentForm", "Student")">Enrollment Form</a></li>
+                                <li><a href="@Url.Action("ViewEnrollment", "Student")">My Enrollment</a></li>
+                            }
+                            else if (role == "admin")
+                            {
+                                <li><a href="@Url.Action("Dashboard", "Admin")">Admin Dashboard</a></li>
+                                <li><a href="@Url.Action("ViewStudents", "Admin")">Manage Students</a></li>
+                            }
+                        }
+                        else
+                        {
+                            <li><a href="@Url.Action("Login", "Account")">Login</a></li>
+                            <li><a href="@Url.Action("Register", "Account")">Register</a></li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>School Hours</h3>
+                    <ul class="footer-info">
+                        <li><strong>Monday - Friday</strong></li>
+                        <li>7:00 AM - 5:00 PM</li>
+                        <li style="margin-top: 15px;"><strong>Office Hours</strong></li>
+                        <li>8:00 AM - 4:00 PM</li>
+                    </ul>
+                    <div class="rating-badge">
+                        <span class="star-icon">⭐</span>
+                        <div>
+                            <strong>Not yet rated</strong><br />
+                            <small>(0 Reviews)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year - Elementary School Enrollment System. All Rights Reserved.</p>
+                <p style="margin-top: 5px;">Developed for <strong>Official Educational Purposes</strong></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/password-strength.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

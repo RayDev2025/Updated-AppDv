@@ -1,0 +1,357 @@
+﻿@model UserRoles.ViewModels.SectionManagementViewModel
+@{
+    ViewData["Title"] = "Manage Sections";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --warning: #f59e0b;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .page-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+        .page-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+    .btn-back {
+        background: #64748b;
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-back:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+    .sections-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .grade-container {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .grade-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #f1f5f9;
+    }
+
+    .grade-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8em;
+        font-weight: 700;
+    }
+
+    .grade-info h2 {
+        margin: 0;
+        font-size: 1.6em;
+        color: #1f2937;
+    }
+
+    .grade-info p {
+        margin: 5px 0 0;
+        color: #64748b;
+    }
+
+    .sections-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .section-card {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+        text-align: center;
+    }
+
+        .section-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            border-color: var(--primary);
+            background: white;
+        }
+
+    .section-number {
+        font-size: 2em;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+
+    .section-student-count {
+        font-size: 0.95em;
+        color: #64748b;
+        margin: 5px 0;
+    }
+
+    .section-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .status-available {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-almost-full {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-full {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-empty {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .grade-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5em;
+        font-weight: 700;
+    }
+
+    .grade-title h3 {
+        margin: 0;
+        font-size: 1.4em;
+        color: #1f2937;
+    }
+
+    .grade-title p {
+        margin: 5px 0 0;
+        color: #64748b;
+        font-size: 0.9em;
+    }
+
+    .section-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .stat-item {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2em;
+        font-weight: 700;
+        color: var(--primary);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.85em;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 5px;
+    }
+
+    .capacity-info {
+        margin-top: 20px;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .capacity-label {
+        font-size: 0.85em;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+
+    .capacity-value {
+        font-size: 1.1em;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .info-box {
+        background: #eff6ff;
+        border-left: 4px solid var(--primary);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #1e40af;
+            line-height: 1.6;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 12px;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            font-size: 5em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Section Management</h1>
+        <a href="@Url.Action("Dashboard", "Admin")" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+  
+
+    @if (Model != null && Model.GradeLevels != null && Model.GradeLevels.Count > 0)
+    {
+        <div class="sections-grid">
+            @foreach (var gradeLevel in Model.GradeLevels)
+            {
+                <div class="grade-container">
+                    <div class="grade-header">
+                        <div class="grade-icon">@gradeLevel.GradeLevel</div>
+                        <div class="grade-info">
+                            <h2>Grade @gradeLevel.GradeLevel</h2>
+                            <p>Total Students: <strong>@gradeLevel.TotalStudents</strong> across @gradeLevel.Sections.Count sections</p>
+                        </div>
+                    </div>
+
+                    <div class="sections-row">
+                        @for (int i = 1; i <= 8; i++)
+                        {
+                            var section = gradeLevel.Sections.FirstOrDefault(s => s.SectionNumber == i);
+                            var studentCount = section?.StudentCount ?? 0;
+                            var maxCapacity = 40;
+                            var statusClass = studentCount == 0 ? "status-empty" :
+                            studentCount >= maxCapacity ? "status-full" :
+                            studentCount >= 30 ? "status-almost-full" :
+                            "status-available";
+                            var statusText = studentCount == 0 ? "Empty" :
+                            studentCount >= maxCapacity ? "Full" :
+                            studentCount >= 30 ? "Almost Full" :
+                            "Available";
+
+                            <a href="@Url.Action("ViewSectionStudents", "Admin", new { gradeLevel = gradeLevel.GradeLevel, section = i })" class="section-card">
+                                <div class="section-number">Section @i</div>
+                                <div class="section-student-count">
+                                    <strong>@studentCount</strong> / @maxCapacity students
+                                </div>
+                                <span class="section-status @statusClass">@statusText</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-door-open"></i>
+            <h3>No Section Data Available</h3>
+            <p>Section capacity information will appear here once enrollments begin.</p>
+        </div>
+    }
+
+    <div style="margin-top: 40px; padding: 20px; background: #fef3c7; border-left: 4px solid var(--warning); border-radius: 8px;">
+        <h4 style="margin: 0 0 10px 0; color: #92400e;">
+            <i class="fas fa-exclamation-triangle"></i> Note
+        </h4>
+        <p style="margin: 0; color: #92400e; line-height: 1.6;">
+            Section assignments are automatically managed by the system during the enrollment approval process.
+            Students are assigned to sections based on availability, with a maximum of 40 students per section.
+        </p>
+    </div>
+</div>

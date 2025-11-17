@@ -1,0 +1,79 @@
+﻿.account-container {
+    background: linear-gradient(135deg, #1a1a1a, #333); /* dark gradient background */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; 
+    padding: 0;
+}
+
+
+.account-box {
+    background-color: #000; 
+    color: #fff; 
+    font-weight: bold; 
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+    max-width: 450px;
+    width: 100%;
+    opacity: 0.95;
+}
+
+    
+    .account-box h2 {
+        color: #fff;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .account-box .form-control {
+        background-color: #222;
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 6px;
+        padding: 12px;
+        font-weight: normal;
+        margin-bottom: 15px;
+    }
+
+        .account-box .form-control:focus {
+            outline: none;
+            border-color: #00bfff;
+            box-shadow: 0 0 8px rgba(0, 191, 255, 0.6);
+        }
+
+    .account-box .btn {
+        background-color: #444;
+        border: none;
+        color: #fff;
+        font-weight: bold;
+        padding: 12px;
+        border-radius: 6px;
+        transition: 0.3s;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+        .account-box .btn:hover {
+            background-color: #666;
+        }
+
+    .account-box a {
+        color: #00bfff;
+        text-decoration: none;
+        font-weight: normal;
+    }
+
+        .account-box a:hover {
+            text-decoration: underline;
+        }
+
+.text-danger {
+    color: #ff4d4d;
+    font-weight: normal;
+}

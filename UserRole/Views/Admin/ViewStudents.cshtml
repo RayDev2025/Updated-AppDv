@@ -1,0 +1,527 @@
+﻿@model IEnumerable<UserRoles.Models.Enrollment>
+@{
+    ViewData["Title"] = "Manage Students";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .page-container {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+        .page-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        background: white;
+        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .filter-tab {
+        padding: 10px 20px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #64748b;
+    }
+
+        .filter-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+    .students-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .students-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .students-table th {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .students-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .students-table tr:hover {
+            background: #f8fafc;
+        }
+
+    .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75em;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .badge-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85em;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-success {
+        background: var(--success);
+        color: white;
+    }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+    .btn-info {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-info:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+    .btn-back {
+        background: #64748b;
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-back:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+        background: white;
+        margin: 10% auto;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        animation: slideDown 0.3s ease;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #1f2937;
+        }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #64748b;
+    }
+
+    .modal-body p {
+        color: #475569;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+    }
+
+    @@keyframes slideDown {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Student Enrollments</h1>
+        <a href="@Url.Action("Dashboard", "Admin")" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" style="margin-bottom: 20px;">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info" style="margin-bottom: 20px;">@TempData["Info"]</div>
+    }
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs" style="margin-bottom: 20px;">
+        <a href="@Url.Action("ViewStudents", new { status = "all" })"
+           class="filter-tab @(ViewBag.CurrentFilter == "all" ? "active" : "")">
+            All Students
+        </a>
+        <a href="@Url.Action("ViewStudents", new { status = "pending" })"
+           class="filter-tab @(ViewBag.CurrentFilter == "pending" ? "active" : "")">
+            Pending
+        </a>
+        <a href="@Url.Action("ViewStudents", new { status = "approved" })"
+           class="filter-tab @(ViewBag.CurrentFilter == "approved" ? "active" : "")">
+            Approved
+        </a>
+        <a href="@Url.Action("ViewStudents", new { status = "rejected" })"
+           class="filter-tab @(ViewBag.CurrentFilter == "rejected" ? "active" : "")">
+            Rejected
+        </a>
+    </div>
+
+    <div class="students-card">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Grade Level</th>
+                            <th>Section</th>
+                            <th>Parent/Guardian</th>
+                            <th>Contact</th>
+                            <th>Date Applied</th>
+                            <th>Status</th>
+                            <th>Documents</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var student in Model)
+                        {
+                            <tr>
+                                <td><strong>@student.StudentName</strong></td>
+                                <td>Grade @student.GradeLevel</td>
+                                <td>@(student.Section.HasValue ? $"Section {student.Section}" : "Not assigned")</td>
+                                <td>@student.ParentName</td>
+                                <td>@student.ContactNumber</td>
+                                <td>@student.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    @if (student.Status == "pending")
+                                    {
+                                        <span class="badge badge-pending">Pending</span>
+                                    }
+                                    else if (student.Status == "approved")
+                                    {
+                                        <span class="badge badge-approved">Approved</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-rejected">Rejected</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <a href="@student.BirthCertificate" target="_blank" class="btn btn-info" title="Birth Certificate">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                        <a href="@student.Form137" target="_blank" class="btn btn-info" title="Form 137">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        @if (student.Status == "pending")
+                                        {
+                                            <button class="btn btn-success" onclick="showAcceptModal(@student.Id, '@student.StudentName')">
+                                                <i class="fas fa-check"></i> Accept
+                                            </button>
+                                            <button class="btn btn-danger" onclick="showDeclineModal(@student.Id, '@student.StudentName')">
+                                                <i class="fas fa-times"></i> Decline
+                                            </button>
+                                        }
+                                        else if (student.Status == "approved" && !student.Section.HasValue)
+                                        {
+                                            <a href="@Url.Action("ReassignStudent", "Admin", new { id = student.Id })" class="btn btn-warning">
+                                                <i class="fas fa-exchange-alt"></i> Assign Section
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: #94a3b8; font-size: 0.85em;">No actions</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No Students Found</h3>
+                <p>There are no enrollment applications matching your filter.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Accept Modal -->
+<div id="acceptModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Accept Enrollment</h3>
+            <button class="close-modal" onclick="closeAcceptModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to accept the enrollment application for <strong id="acceptStudentName"></strong>?</p>
+            <p style="color: #10b981; font-weight: 600;">✅ An acceptance email will be automatically sent to the student's registered email address.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAcceptModal()" style="background: #94a3b8;">Cancel</button>
+            <form id="acceptForm" method="post" style="display: inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> Confirm Accept
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Decline Modal -->
+<div id="declineModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Decline Enrollment</h3>
+            <button class="close-modal" onclick="closeDeclineModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to decline the enrollment application for <strong id="declineStudentName"></strong>?</p>
+            <p style="color: #ef4444; font-weight: 600;">⚠️ A notification email will be sent to the student.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDeclineModal()" style="background: #94a3b8;">Cancel</button>
+            <form id="declineForm" method="post" style="display: inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Confirm Decline
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showAcceptModal(id, name) {
+        document.getElementById('acceptStudentName').textContent = name;
+        document.getElementById('acceptForm').action = '@Url.Action("AcceptEnrollment", "Admin")';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'id';
+        input.value = id;
+
+        const form = document.getElementById('acceptForm');
+        form.innerHTML = '';
+        form.appendChild(document.querySelector('input[name="__RequestVerificationToken"]').cloneNode(true));
+        form.appendChild(input);
+
+        const button = document.createElement('button');
+        button.type = 'submit';
+        button.className = 'btn btn-success';
+        button.innerHTML = '<i class="fas fa-check"></i> Confirm Accept';
+        form.appendChild(button);
+
+        document.getElementById('acceptModal').style.display = 'block';
+    }
+
+    function closeAcceptModal() {
+        document.getElementById('acceptModal').style.display = 'none';
+    }
+
+    function showDeclineModal(id, name) {
+        document.getElementById('declineStudentName').textContent = name;
+        document.getElementById('declineForm').action = '@Url.Action("DeclineEnrollment", "Admin")';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'id';
+        input.value = id;
+
+        const form = document.getElementById('declineForm');
+        form.innerHTML = '';
+        form.appendChild(document.querySelector('input[name="__RequestVerificationToken"]').cloneNode(true));
+        form.appendChild(input);
+
+        const button = document.createElement('button');
+        button.type = 'submit';
+        button.className = 'btn btn-danger';
+        button.innerHTML = '<i class="fas fa-times"></i> Confirm Decline';
+        form.appendChild(button);
+
+        document.getElementById('declineModal').style.display = 'block';
+    }
+
+    function closeDeclineModal() {
+        document.getElementById('declineModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target.className === 'modal') {
+            event.target.style.display = 'none';
+        }
+    }
+</script>

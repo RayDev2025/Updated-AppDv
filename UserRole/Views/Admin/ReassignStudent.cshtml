@@ -1,0 +1,300 @@
+﻿@model UserRoles.Models.Enrollment
+@{
+    ViewData["Title"] = "Reassign Student to Section";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .page-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .reassign-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .reassign-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .reassign-header h1 {
+        margin: 0 0 10px 0;
+        color: #1f2937;
+        font-size: 2em;
+    }
+
+    .reassign-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 1.05em;
+    }
+
+    .student-info {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+
+    .student-info h3 {
+        margin: 0 0 15px 0;
+        color: #1f2937;
+        font-size: 1.2em;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    .info-value {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 10px;
+        font-size: 1.05em;
+    }
+
+    .section-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .section-option {
+        position: relative;
+    }
+
+    .section-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .section-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        min-height: 100px;
+    }
+
+    .section-option input[type="radio"]:checked + label {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: var(--primary);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .section-option label:hover {
+        border-color: var(--primary);
+        transform: translateY(-3px);
+    }
+
+    .section-number {
+        font-size: 2em;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .section-capacity {
+        font-size: 0.85em;
+        opacity: 0.8;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        color: #1e40af;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1.05em;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #475569;
+    }
+
+    @@media (max-width: 768px) {
+        .section-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="reassign-card">
+        <div class="reassign-header">
+            <h1><i class="fas fa-exchange-alt"></i> Reassign Student to Section</h1>
+            <p>Select a new section for the student</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            </div>
+        }
+
+        <div class="student-info">
+            <h3><i class="fas fa-user"></i> Student Information</h3>
+            <div class="info-row">
+                <span class="info-label">Student Name:</span>
+                <span class="info-value">@Model.StudentName</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Grade Level:</span>
+                <span class="info-value">Grade @Model.GradeLevel</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Current Section:</span>
+                <span class="info-value">@(Model.Section.HasValue ? $"Section {Model.Section}" : "Not Assigned")</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Parent/Guardian:</span>
+                <span class="info-value">@Model.ParentName</span>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Note:</strong> Only sections with available capacity (less than 40 students) are shown below.
+        </div>
+
+        <form asp-action="ReassignStudent" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label>
+                    <i class="fas fa-door-open"></i> Select New Section
+                </label>
+
+                @if (ViewBag.AvailableSections != null && ((List<int>)ViewBag.AvailableSections).Any())
+                {
+                    <div class="section-grid">
+                        @foreach (var sectionNum in (List<int>)ViewBag.AvailableSections)
+                        {
+                            <input type="radio" name="newSection" id="section_@sectionNum" value="@sectionNum" required />
+                            <label for="section_@sectionNum">
+                                <div class="section-number">@sectionNum</div>
+                                    <div class="section-capacity">Section @sectionNum</div>
+                                    <div class="section-capacity">Available</div>
+                                </label>
+                            
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle"></i> 
+                        <strong>No available sections!</strong> All sections for Grade @ViewBag.GradeLevel are full (40/40 students).
+                    </div>
+                }
+            </div>
+
+            <div class="form-actions">
+                <a href="@Url.Action("ViewStudents", "Admin")" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                @if (ViewBag.AvailableSections != null && ((List<int>)ViewBag.AvailableSections).Any())
+                {
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Reassign Student
+                    </button>
+                }
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,425 @@
+@{
+    ViewData["Title"] = "Manage Professor Sections";
+    var professor = ViewBag.Professor as UserRoles.Models.Users;
+    var assignments = ViewBag.Assignments as List<UserRoles.Models.ProfessorSectionAssignment>;
+    var currentGradeLevel = ViewBag.GradeLevel as string;
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .page-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+        .page-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+    .btn-back {
+        background: #64748b;
+        color: white;
+    }
+
+        .btn-back:hover {
+            background: #475569;
+        }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+    .professor-info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .professor-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .professor-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2em;
+        font-weight: 700;
+    }
+
+    .professor-details h2 {
+        margin: 0 0 5px 0;
+        color: #1f2937;
+    }
+
+    .professor-details p {
+        margin: 0;
+        color: #64748b;
+    }
+
+    .assignments-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+        .section-header h3 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 1.5em;
+        }
+
+    .assignments-list {
+        display: grid;
+        gap: 15px;
+    }
+
+    .assignment-card {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+        .assignment-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+    .assignment-info {
+        flex: 1;
+    }
+
+        .assignment-info h4 {
+            margin: 0 0 8px 0;
+            color: #1f2937;
+            font-size: 1.1em;
+        }
+
+    .assignment-details {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        color: #64748b;
+        font-size: 0.9em;
+    }
+
+        .assignment-details span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+    .add-section-form {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+            .form-group select:focus,
+            .form-group input:focus {
+                outline: none;
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <h1><i class="fas fa-users"></i> Manage Professor Sections</h1>
+        <a href="@Url.Action("ManageProfessors", "Admin")" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Professors
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        </div>
+    }
+
+    @if (professor != null)
+    {
+        <!-- Professor Information -->
+        <div class="professor-info-card">
+            <div class="professor-header">
+                <div class="professor-avatar">
+                    @professor.FullName.Substring(0, 1).ToUpper()
+                </div>
+                <div class="professor-details">
+                    <h2>@professor.FullName</h2>
+                    <p><i class="fas fa-envelope"></i> @professor.Email</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Section Assignments -->
+        <div class="assignments-section">
+            <div class="section-header">
+                <h3><i class="fas fa-list"></i> Current Section Assignments</h3>
+            </div>
+
+            @if (assignments != null && assignments.Any())
+            {
+                <div class="assignments-list">
+                    @foreach (var assignment in assignments)
+                    {
+                        <div class="assignment-card">
+                            <div class="assignment-info">
+                                <h4>Grade @assignment.GradeLevel - Section @assignment.Section</h4>
+                                <div class="assignment-details">
+                                    @if (!string.IsNullOrEmpty(assignment.Subject))
+                                    {
+                                        <span><i class="fas fa-book"></i> @assignment.Subject</span>
+                                    }
+                                    <span><i class="fas fa-door-open"></i> @(assignment.AssignedRoom ?? "TBA")</span>
+                                </div>
+                            </div>
+                            <div>
+                                @if (assignment.Id > 0) // Only show remove for additional assignments
+                                {
+                                    <form method="post" action="@Url.Action("RemoveSectionFromProfessor", "Admin")" style="display: inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="assignmentId" value="@assignment.Id" />
+                                        <input type="hidden" name="professorId" value="@professor.Id" />
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to remove this section assignment?');">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span style="color: #64748b; font-size: 0.9em;"><i class="fas fa-info-circle"></i> Primary Assignment</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Section Assignments</h3>
+                    <p>This professor doesn't have any section assignments yet.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Add New Section Assignment -->
+        <div class="add-section-form">
+            <h3 style="margin: 0 0 25px 0; color: #1f2937;"><i class="fas fa-plus-circle"></i> Add New Section Assignment</h3>
+
+            <form method="post" action="@Url.Action("AddSectionToProfessor", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="professorId" value="@professor.Id" />
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-graduation-cap"></i> Grade Level *</label>
+                        <select name="gradeLevel" id="gradeSelect" class="form-control" required>
+                            <option value="">-- Select Grade --</option>
+                            <option value="1">Grade 1</option>
+                            <option value="2">Grade 2</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                            <option value="6">Grade 6</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="sectionGroup">
+                        <label><i class="fas fa-door-open"></i> Section *</label>
+                        <select name="section" id="sectionSelect" class="form-control" required>
+                            <option value="">-- Select Section --</option>
+                            @for (int i = 1; i <= 8; i++)
+                            {
+                                <option value="@i">Section @i</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="subjectGroup" style="display: none;">
+                        <label><i class="fas fa-book"></i> Subject *</label>
+                        <select name="subject" id="subjectSelect" class="form-control">
+                            <option value="">-- Select Subject --</option>
+                            <option value="Math">Math</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Filipino">Filipino</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="MAPEH">MAPEH</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Section Assignment
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+<script>
+    const gradeSelect = document.getElementById('gradeSelect');
+    const sectionGroup = document.getElementById('sectionGroup');
+    const subjectGroup = document.getElementById('subjectGroup');
+    const subjectSelect = document.getElementById('subjectSelect');
+
+    gradeSelect.addEventListener('change', function() {
+        const gradeLevel = parseInt(this.value);
+
+        if (gradeLevel >= 4 && gradeLevel <= 6) {
+            subjectGroup.style.display = 'block';
+            subjectSelect.required = true;
+        } else {
+            subjectGroup.style.display = 'none';
+            subjectSelect.required = false;
+            subjectSelect.value = '';
+        }
+    });
+</script>
+

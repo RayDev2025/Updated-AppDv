@@ -1,0 +1,347 @@
+﻿@model UserRoles.ViewModels.ProfessorDashboardViewModel
+@{
+    ViewData["Title"] = "Professor Dashboard";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .welcome-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+        .welcome-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.2em;
+        }
+
+        .welcome-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary);
+    }
+
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: #64748b;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 10px 0;
+        }
+
+        .stat-card .label {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+    .schedule-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+        .schedule-card h2 {
+            margin: 0 0 20px 0;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    .schedule-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .schedule-item {
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+        .schedule-item .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .schedule-item strong {
+            display: block;
+            font-size: 1.2em;
+            color: #1f2937;
+            margin: 5px 0;
+        }
+
+        .schedule-item span {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+    .students-section {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+        .students-section h2 {
+            margin: 0 0 20px 0;
+            color: #1f2937;
+        }
+
+    .students-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .students-table th {
+            background: #f8fafc;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .students-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .students-table tr:hover {
+            background: #f8fafc;
+        }
+
+    .student-name {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .btn-view {
+        padding: 6px 14px;
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-view:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+    .shift-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .shift-morning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .shift-afternoon {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="welcome-header">
+        <h1>Welcome, @Model.ProfessorName!</h1>
+        <p>Grade @Model.GradeLevel - Section @Model.Section | @Model.ClassSchedule.Shift Shift</p>
+        <!-- NEW: Display Room -->
+        <p style="font-size: 1.1em; margin-top: 10px;">
+            <i class="fas fa-door-open"></i> @Model.AssignedRoom
+        </p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card" style="border-left-color: var(--info);">
+            <h3>My Grade Level</h3>
+            <div class="value">@Model.GradeLevel</div>
+            <div class="label">Assigned Grade</div>
+        </div>
+
+        <div class="stat-card" style="border-left-color: var(--success);">
+            <h3>My Section</h3>
+            <div class="value">@Model.Section</div>
+            <div class="label">Assigned Section</div>
+        </div>
+
+        <!-- NEW: Room Card -->
+        <div class="stat-card" style="border-left-color: var(--warning);">
+            <h3>My Classroom</h3>
+            <div class="value" style="font-size: 1.5em;">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div class="label">@Model.AssignedRoom</div>
+        </div>
+
+        <div class="stat-card" style="border-left-color: var(--primary);">
+            <h3>Total Students</h3>
+            <div class="value">@Model.TotalStudents</div>
+            <div class="label">Enrolled Students</div>
+        </div>
+    </div>
+
+    <div class="schedule-card">
+        <h2>
+            <i class="fas fa-clock"></i>
+            My Class Schedule
+            <span class="shift-badge shift-@Model.ClassSchedule.Shift.ToLower()">
+                @Model.ClassSchedule.Shift Shift
+            </span>
+        </h2>
+
+        <div class="schedule-info">
+            <div class="schedule-item" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+                <div class="icon"></div>
+                <strong>@Model.ClassSchedule.StartTime</strong>
+                <span>Start Time</span>
+            </div>
+
+            <div class="schedule-item" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                <div class="icon"></div>
+                <strong>@Model.ClassSchedule.Schedule</strong>
+                <span>Class Hours</span>
+            </div>
+
+            <div class="schedule-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);">
+                <div class="icon"></div>
+                <strong>@Model.ClassSchedule.EndTime</strong>
+                <span>End Time</span>
+            </div>
+
+            <div class="schedule-item" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                <div class="icon"></div>
+                <strong>5 Hours</strong>
+                <span>Duration</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="students-section">
+        <h2><i class="fas fa-users"></i> My Students (@Model.TotalStudents)</h2>
+
+        @if (Model.Students.Any())
+        {
+            <div style="overflow-x: auto;">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Parent/Guardian</th>
+                            <th>Contact Number</th>
+                            <th>Address</th>
+                            <th>Enrollment Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var index = 1;
+                        }
+                        @foreach (var student in Model.Students)
+                        {
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">@index</td>
+                                <td class="student-name">@student.StudentName</td>
+                                <td>@student.ParentName</td>
+                                <td>@student.ContactNumber</td>
+                                <td>@student.Address</td>
+                                <td>@student.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <a href="@Url.Action("ViewStudent", "Professor", new { id = student.Id })" class="btn-view">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-user-slash"></i>
+                <h3>No Students Yet</h3>
+                <p>There are currently no enrolled students in your section.</p>
+            </div>
+        }
+    </div>
+</div>

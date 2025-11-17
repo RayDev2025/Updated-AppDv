@@ -1,0 +1,480 @@
+﻿@{
+    ViewData["Title"] = "User Dashboard";
+    var enrollment = ViewBag.Enrollment as UserRoles.Models.Enrollment;
+    var professor = ViewBag.AssignedProfessor as UserRoles.Models.Users;
+    var professors = ViewBag.AssignedProfessors as List<UserRoles.Models.Users>;
+    var room = ViewBag.AssignedRoom as string;
+    var schedule = ViewBag.ClassSchedule as string;
+    var shift = ViewBag.Shift as string;
+    var gradeLevel = enrollment != null ? int.Parse(enrollment.GradeLevel) : 0;
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .welcome-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+        .welcome-card h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.2em;
+        }
+
+        .welcome-card p {
+            margin: 5px 0;
+            opacity: 0.95;
+            font-size: 1.1em;
+        }
+
+    .profile-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+        .profile-section h2 {
+            color: #1f2937;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    .profile-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .info-item {
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary);
+    }
+
+        .info-item strong {
+            display: block;
+            color: #64748b;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .info-item span {
+            display: block;
+            color: #1f2937;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+    .enrollment-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+        .enrollment-card h2 {
+            color: #1f2937;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    .enrollment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .enrollment-item {
+        padding: 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+        .enrollment-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+    .enrollment-item-icon {
+        font-size: 2em;
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+
+    .enrollment-item strong {
+        display: block;
+        color: #64748b;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .enrollment-item span {
+        display: block;
+        color: #1f2937;
+        font-size: 1.2em;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .status-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        border-left: 4px solid var(--info);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        border-left: 4px solid var(--warning);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+    .schedule-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+        .schedule-box h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+        }
+
+        .schedule-box .time {
+            font-size: 2em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .schedule-box .shift {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+    @@media (max-width: 768px) {
+        .enrollment-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="welcome-card">
+        <h1>Welcome, @User.Identity.Name!</h1>
+        <p><i class="fas fa-user-circle"></i> This is your personal dashboard</p>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="profile-section">
+        <h2><i class="fas fa-id-card"></i> Your Profile</h2>
+        <div class="profile-info">
+            <div class="info-item">
+                <strong>Email Address</strong>
+                <span>@User.Identity.Name</span>
+            </div>
+            <div class="info-item">
+                <strong>Account Role</strong>
+                <span>Student/Parent</span>
+            </div>
+            <div class="info-item">
+                <strong>Account Status</strong>
+                <span style="color: var(--success);"><i class="fas fa-check-circle"></i> Active</span>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="@Url.Action("ChangePassword", "Account")" class="btn btn-warning">
+                <i class="fas fa-key"></i> Change Password
+            </a>
+        </div>
+    </div>
+
+    @if (enrollment != null)
+    {
+        @if (enrollment.Status == "approved")
+        {
+            <!-- Enrollment Information -->
+            <div class="enrollment-card">
+                <h2><i class="fas fa-graduation-cap"></i> Enrollment Information</h2>
+
+                <div class="alert-info">
+                    <strong><i class="fas fa-info-circle"></i> Enrollment Status:</strong>
+                    <span class="status-badge status-approved">APPROVED</span>
+                    <p style="margin: 10px 0 0;">Your enrollment has been approved! Below are your class details.</p>
+                </div>
+
+                <div class="enrollment-grid">
+                    <div class="enrollment-item">
+                        <div class="enrollment-item-icon"><i class="fas fa-user-graduate"></i></div>
+                        <strong>Student Name</strong>
+                        <span>@enrollment.StudentName</span>
+                    </div>
+
+                    <div class="enrollment-item">
+                        <div class="enrollment-item-icon"><i class="fas fa-layer-group"></i></div>
+                        <strong>Grade Level</strong>
+                        <span>Grade @enrollment.GradeLevel</span>
+                    </div>
+
+                    <div class="enrollment-item">
+                        <div class="enrollment-item-icon"><i class="fas fa-users"></i></div>
+                        <strong>Section</strong>
+                        <span>Section @enrollment.Section</span>
+                    </div>
+
+                    <div class="enrollment-item">
+                        <div class="enrollment-item-icon"><i class="fas fa-door-open"></i></div>
+                        <strong>Assigned Room</strong>
+                        <span>@(room ?? "TBA")</span>
+                    </div>
+
+                    @if (gradeLevel >= 1 && gradeLevel <= 3)
+                    {
+                        @if (professor != null)
+                        {
+                            <div class="enrollment-item">
+                                <div class="enrollment-item-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                                <strong>Class Adviser</strong>
+                                <span>@professor.FullName</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="enrollment-item">
+                                <div class="enrollment-item-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                                <strong>Class Adviser</strong>
+                                <span>To Be Assigned</span>
+                            </div>
+                        }
+                    }
+                    else if (gradeLevel >= 4 && gradeLevel <= 6)
+                    {
+                        <div class="enrollment-item" style="grid-column: 1 / -1;">
+                            <div class="enrollment-item-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                            <strong>Subject Teachers</strong>
+                            @if (professors != null && professors.Any())
+                            {
+                                <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                                    @foreach (var prof in professors.OrderBy(p => p.AssignedSubject))
+                                    {
+                                        <div style="background: white; padding: 10px; border-radius: 6px; border-left: 3px solid #6366f1;">
+                                            <strong style="color: #1f2937; display: block; font-size: 0.9em;">@prof.AssignedSubject</strong>
+                                            <span style="color: #64748b; font-size: 0.85em;">@prof.FullName</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span>To Be Assigned</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="enrollment-item">
+                        <div class="enrollment-item-icon"><i class="fas fa-user-friends"></i></div>
+                        <strong>Parent/Guardian</strong>
+                        <span>@enrollment.ParentName</span>
+                    </div>
+
+                    <div class="enrollment-item">
+                        <div class="enrollment-item-icon"><i class="fas fa-phone"></i></div>
+                        <strong>Contact Number</strong>
+                        <span>@enrollment.ContactNumber</span>
+                    </div>
+
+                    <div class="enrollment-item">
+                        <div class="enrollment-item-icon"><i class="fas fa-calendar-check"></i></div>
+                        <strong>Enrollment Date</strong>
+                        <span>@enrollment.EnrollmentDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(schedule))
+                {
+                    <div class="schedule-box">
+                        <h3><i class="fas fa-clock"></i> Class Schedule</h3>
+                        <div class="time">@schedule</div>
+                        <div class="shift">@shift Shift</div>
+                        <p style="margin-top: 15px; opacity: 0.9;">Monday to Friday | 5 Hours Daily</p>
+                    </div>
+                }
+
+                @if (gradeLevel >= 4 && gradeLevel <= 6 && professors != null && professors.Any())
+                {
+                    <div style="background: white; border-radius: 12px; padding: 25px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="color: #1f2937; font-size: 1.5em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-book-reader"></i> Subject Schedule
+                        </h3>
+                        <div style="display: grid; gap: 12px;">
+                            @foreach (var prof in professors.OrderBy(p => p.AssignedSubject))
+                            {
+                                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong style="color: #1f2937; display: block; font-size: 1.1em;">@prof.AssignedSubject</strong>
+                                        <span style="color: #64748b; font-size: 0.9em;">@prof.FullName</span>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span style="color: #6366f1; font-weight: 600; font-size: 0.9em;">@schedule</span>
+                                        <div style="color: #94a3b8; font-size: 0.85em; margin-top: 5px;">@shift Shift</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="@Url.Action("ViewEnrollment", "Student")" class="btn btn-primary">
+                        <i class="fas fa-eye"></i> View Full Enrollment Details
+                    </a>
+                    <a href="@Url.Action("PrintEnrollment", "Student")" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-print"></i> Print Enrollment
+                    </a>
+                </div>
+            </div>
+        }
+        else if (enrollment.Status == "pending")
+        {
+            <div class="enrollment-card">
+                <h2><i class="fas fa-hourglass-half"></i> Enrollment Status</h2>
+                <div class="alert-warning">
+                    <strong><i class="fas fa-clock"></i> Status:</strong>
+                    <span class="status-badge status-pending">PENDING</span>
+                    <p style="margin: 10px 0 0;">Your enrollment application is being reviewed by the administrator. You will receive an email notification once it's approved.</p>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="@Url.Action("ViewEnrollment", "Student")" class="btn btn-primary">
+                        <i class="fas fa-eye"></i> Check Application Status
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="enrollment-card">
+                <h2><i class="fas fa-times-circle"></i> Enrollment Status</h2>
+                <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 20px; border-radius: 8px;">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Status:</strong>
+                    <span class="status-badge status-rejected">NOT APPROVED</span>
+                    <p style="margin: 10px 0 0;">Your enrollment application was not approved. Please contact the school office for more information.</p>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="enrollment-card">
+            <h2><i class="fas fa-file-alt"></i> Enrollment</h2>
+            <div class="alert-info">
+                <strong><i class="fas fa-info-circle"></i> No Enrollment Found</strong>
+                <p style="margin: 10px 0 0;">You haven't submitted an enrollment application yet. Click below to start your enrollment process.</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="@Url.Action("EnrollmentForm", "Student")" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Start Enrollment
+                </a>
+            </div>
+        </div>
+    }
+</div>

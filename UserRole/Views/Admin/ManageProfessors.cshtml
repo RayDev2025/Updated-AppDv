@@ -1,0 +1,794 @@
+﻿@model IEnumerable<UserRoles.Models.Users>
+@{
+    ViewData["Title"] = "Manage Professors";
+    var professorsList = Model?.ToList() ?? new List<UserRoles.Models.Users>();
+    var totalCount = professorsList.Count;
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .page-container {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+        .page-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+    .btn-back {
+        background: #64748b;
+        color: white;
+    }
+
+        .btn-back:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+    .btn-edit {
+        background: var(--warning);
+        color: white;
+        padding: 8px 16px;
+        font-size: 0.85em;
+    }
+
+        .btn-edit:hover {
+            background: #d97706;
+        }
+
+    .btn-delete {
+        background: var(--danger);
+        color: white;
+        padding: 8px 16px;
+        font-size: 0.85em;
+    }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+    /* Search Section Styles */
+    .search-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .search-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        flex: 1;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.1em;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 45px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+    .clear-search {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 5px;
+        font-size: 1.1em;
+        transition: color 0.3s ease;
+    }
+
+        .clear-search:hover {
+            color: var(--danger);
+        }
+
+    .search-filters {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+    .btn-reset-filters {
+        padding: 10px 20px;
+        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        color: #475569;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-reset-filters:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+
+    .search-results-info {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f5f9;
+        color: #64748b;
+        font-size: 0.95em;
+    }
+
+    #resultsCount {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .professors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+    }
+
+    .professor-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .professor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .professor-card.hidden {
+            display: none;
+        }
+
+    .professor-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .professor-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5em;
+        font-weight: 700;
+    }
+
+    .professor-info h3 {
+        margin: 0 0 5px 0;
+        font-size: 1.2em;
+        color: #1f2937;
+    }
+
+    .professor-email {
+        color: #64748b;
+        font-size: 0.9em;
+    }
+
+    .professor-details {
+        margin-bottom: 20px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .detail-label {
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .detail-value {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+    .professor-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 12px;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            font-size: 5em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+    .no-results-message {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+        color: #64748b;
+        display: none;
+    }
+
+        .no-results-message.show {
+            display: block;
+        }
+
+        .no-results-message i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+    /* Delete Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+        background: white;
+        margin: 15% auto;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        animation: slideDown 0.3s ease;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #1f2937;
+        }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #64748b;
+    }
+
+    .modal-body p {
+        color: #475569;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .search-filters {
+            flex-direction: column;
+        }
+
+        .filter-select,
+        .btn-reset-filters {
+            width: 100%;
+        }
+
+        .professors-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Professor Management</h1>
+        <div class="header-actions">
+            <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <a href="@Url.Action("AddProfessor", "Admin")" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Professor
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" style="margin-bottom: 20px; padding: 15px; background: #d1fae5; color: #065f46; border-radius: 8px;">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" style="margin-bottom: 20px; padding: 15px; background: #fee2e2; color: #991b1b; border-radius: 8px;">
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- Search Bar -->
+    <div class="search-section">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by name, email, grade level, or section..." />
+                <button class="clear-search" id="clearSearch" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="search-filters">
+                <select id="gradeFilter" class="filter-select">
+                    <option value="">All Grades</option>
+                    <option value="1">Grade 1</option>
+                    <option value="2">Grade 2</option>
+                    <option value="3">Grade 3</option>
+                    <option value="4">Grade 4</option>
+                    <option value="5">Grade 5</option>
+                    <option value="6">Grade 6</option>
+                </select>
+                <select id="sectionFilter" class="filter-select">
+                    <option value="">All Sections</option>
+                    <option value="1">Section 1</option>
+                    <option value="2">Section 2</option>
+                    <option value="3">Section 3</option>
+                    <option value="4">Section 4</option>
+                    <option value="5">Section 5</option>
+                    <option value="6">Section 6</option>
+                    <option value="7">Section 7</option>
+                    <option value="8">Section 8</option>
+                </select>
+                <button class="btn-reset-filters" id="resetFilters">
+                    <i class="fas fa-redo"></i> Reset Filters
+                </button>
+            </div>
+        </div>
+        <div class="search-results-info">
+            <span id="resultsCount">Showing @totalCount professor@(totalCount != 1 ? "s" : "")</span>
+        </div>
+    </div>
+
+    @if (professorsList.Any())
+    {
+        <div class="professors-grid" id="professorsGrid">
+            @foreach (var professor in professorsList)
+            {
+                <div class="professor-card"
+                     data-name="@professor.FullName.ToLower()"
+                     data-email="@professor.Email.ToLower()"
+                     data-grade="@(professor.AssignedGradeLevel ?? "")"
+                     data-section="@(professor.AssignedSection?.ToString() ?? "")">
+                    <div class="professor-header">
+                        <div class="professor-avatar">
+                            @professor.FullName.Substring(0, 1).ToUpper()
+                        </div>
+                        <div class="professor-info">
+                            <h3>@professor.FullName</h3>
+                            <div class="professor-email">
+                                <i class="fas fa-envelope"></i> @professor.Email
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professor-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Assigned Grade Level</span>
+                            <span class="detail-value">Grade @(professor.AssignedGradeLevel ?? "N/A")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Assigned Sections</span>
+                            <span class="detail-value">
+                                @{
+                                    var assignmentCounts = ViewBag.AssignmentCounts as Dictionary<string, int>;
+                                    var count = assignmentCounts?.GetValueOrDefault(professor.Id) ?? 0;
+                                    var totalSections = count + (professor.AssignedSection.HasValue ? 1 : 0);
+                                }
+                                @if (totalSections > 0)
+                                {
+                                    <text>@totalSections section@(totalSections > 1 ? "s" : "")</text>
+                                    if (professor.AssignedSection.HasValue)
+                                    {
+                                        <text> (Primary: Section @professor.AssignedSection)</text>
+                                    }
+                                }
+                                else
+                                {
+                                    <text>Not assigned</text>
+                                }
+                            </span>
+                        </div>
+                        <!-- NEW: Display Room -->
+                        <div class="detail-row">
+                            <span class="detail-label">Assigned Room</span>
+                            <span class="detail-value" style="color: var(--warning);">
+                                <i class="fas fa-door-open"></i> @(professor.AssignedRoom ?? "No room assigned")
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Account Status</span>
+                            <span class="detail-value" style="color: var(--success);">
+                                <i class="fas fa-check-circle"></i> Active
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="professor-actions">
+                        <a href="@Url.Action("ManageProfessorSections", "Admin", new { id = professor.Id })" class="btn" style="background: var(--primary); color: white; padding: 8px 16px; font-size: 0.85em;">
+                            <i class="fas fa-users"></i> Manage Sections
+                        </a>
+                        <a href="@Url.Action("EditProfessor", "Admin", new { id = professor.Id })" class="btn btn-edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-delete" onclick="showDeleteModal('@professor.Id', '@professor.FullName')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="no-results-message" id="noResults">
+            <i class="fas fa-search"></i>
+            <h3>No professors found</h3>
+            <p>Try adjusting your search or filters to find what you're looking for.</p>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <h3>No Professors Yet</h3>
+            <p>Get started by adding your first professor to the system.</p>
+            <a href="@Url.Action("AddProfessor", "Admin")" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-plus"></i> Add Professor
+            </a>
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Delete Professor</h3>
+            <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteProfessorName"></strong>?</p>
+            <p style="color: var(--danger); font-weight: 600;">
+                <i class="fas fa-exclamation-triangle"></i> This action cannot be undone. All professor data will be permanently removed.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeDeleteModal()" style="background: #94a3b8; color: white;">Cancel</button>
+            <form id="deleteForm" method="post" style="display: inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-delete">
+                    <i class="fas fa-trash"></i> Confirm Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Search and Filter Functionality
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    const gradeFilter = document.getElementById('gradeFilter');
+    const sectionFilter = document.getElementById('sectionFilter');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    const professorsGrid = document.getElementById('professorsGrid');
+    const resultsCount = document.getElementById('resultsCount');
+    const noResults = document.getElementById('noResults');
+    const professorCards = document.querySelectorAll('.professor-card');
+
+    let totalProfessors = @totalCount;
+
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase().trim();
+
+            // Show/hide clear button
+            clearSearchBtn.style.display = searchTerm ? 'block' : 'none';
+
+            filterProfessors();
+        });
+    }
+
+    // Clear search
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            clearSearchBtn.style.display = 'none';
+            filterProfessors();
+            searchInput.focus();
+        });
+    }
+
+    // Grade filter
+    if (gradeFilter) {
+        gradeFilter.addEventListener('change', filterProfessors);
+    }
+
+    // Section filter
+    if (sectionFilter) {
+        sectionFilter.addEventListener('change', filterProfessors);
+    }
+
+    // Reset all filters
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            gradeFilter.value = '';
+            sectionFilter.value = '';
+            clearSearchBtn.style.display = 'none';
+            filterProfessors();
+        });
+    }
+
+    // Main filter function
+    function filterProfessors() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedGrade = gradeFilter.value;
+        const selectedSection = sectionFilter.value;
+
+        let visibleCount = 0;
+
+        professorCards.forEach(card => {
+            const name = card.dataset.name;
+            const email = card.dataset.email;
+            const grade = card.dataset.grade;
+            const section = card.dataset.section;
+
+            // Check search term
+            const matchesSearch = !searchTerm ||
+                name.includes(searchTerm) ||
+                email.includes(searchTerm) ||
+                grade.includes(searchTerm) ||
+                section.includes(searchTerm);
+
+            // Check grade filter
+            const matchesGrade = !selectedGrade || grade === selectedGrade;
+
+            // Check section filter
+            const matchesSection = !selectedSection || section === selectedSection;
+
+            // Show/hide card based on all filters
+            if (matchesSearch && matchesGrade && matchesSection) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        // Update results count
+        updateResultsCount(visibleCount);
+
+        // Show/hide no results message
+        if (professorsGrid && noResults) {
+            if (visibleCount === 0) {
+                professorsGrid.style.display = 'none';
+                noResults.classList.add('show');
+            } else {
+                professorsGrid.style.display = 'grid';
+                noResults.classList.remove('show');
+            }
+        }
+    }
+
+    function updateResultsCount(count) {
+        if (count === totalProfessors) {
+            resultsCount.textContent = `Showing all ${totalProfessors} professor${totalProfessors !== 1 ? 's' : ''}`;
+        } else if (count === 1) {
+            resultsCount.textContent = `Showing 1 professor`;
+        } else {
+            resultsCount.textContent = `Showing ${count} of ${totalProfessors} professors`;
+        }
+    }
+
+    // Delete modal functions
+    function showDeleteModal(id, name) {
+        document.getElementById('deleteProfessorName').textContent = name;
+        document.getElementById('deleteForm').action = '@Url.Action("DeleteProfessor", "Admin")';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'id';
+        input.value = id;
+
+        const form = document.getElementById('deleteForm');
+        form.innerHTML = '';
+        form.appendChild(document.querySelector('input[name="__RequestVerificationToken"]').cloneNode(true));
+        form.appendChild(input);
+
+        const button = document.createElement('button');
+        button.type = 'submit';
+        button.className = 'btn btn-delete';
+        button.innerHTML = '<i class="fas fa-trash"></i> Confirm Delete';
+        form.appendChild(button);
+
+        document.getElementById('deleteModal').style.display = 'block';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    window.onclick = function (event) {
+        if (event.target.className === 'modal') {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+        // Ctrl/Cmd + K to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }
+
+        // Escape to clear search and close modals
+        if (e.key === 'Escape') {
+            if (searchInput && searchInput.value) {
+                searchInput.value = '';
+                clearSearchBtn.style.display = 'none';
+                filterProfessors();
+            }
+            closeDeleteModal();
+        }
+    });
+</script>
