@@ -188,6 +188,22 @@
             gap: 5px;
         }
 
+    .schedule-badge {
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .no-schedule {
+        color: #94a3b8;
+        font-style: italic;
+    }
+
     .add-section-form {
         background: white;
         border-radius: 12px;
@@ -223,11 +239,70 @@
                 box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
             }
 
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 0.85em;
+        }
+
     .form-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 15px;
     }
+
+    .time-schedule-section {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border: 2px solid #e2e8f0;
+    }
+
+        .time-schedule-section h4 {
+            margin: 0 0 15px 0;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .time-schedule-section p {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+    .schedule-preview {
+        background: #dbeafe;
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+        display: none;
+    }
+
+        .schedule-preview strong {
+            color: #1e40af;
+        }
+
+        .schedule-preview span {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+    .schedule-note {
+        background: #fef3c7;
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+        border-left: 3px solid #f59e0b;
+    }
+
+        .schedule-note small {
+            color: #92400e;
+            display: block;
+        }
 
     .alert {
         padding: 15px;
@@ -238,11 +313,18 @@
     .alert-success {
         background: #d1fae5;
         color: #065f46;
+        border-left: 4px solid #10b981;
     }
 
     .alert-danger {
         background: #fee2e2;
         color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+
+    .alert-warning {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
     }
 
     .empty-state {
@@ -315,10 +397,25 @@
                                         <span><i class="fas fa-book"></i> @assignment.Subject</span>
                                     }
                                     <span><i class="fas fa-door-open"></i> @(assignment.AssignedRoom ?? "TBA")</span>
+
+                                    @* NEW: Display schedule information *@
+                                    @if (!string.IsNullOrEmpty(assignment.StartTime) && !string.IsNullOrEmpty(assignment.EndTime) && !string.IsNullOrEmpty(assignment.DayOfWeek))
+                                    {
+                                        <span class="schedule-badge">
+                                            <i class="fas fa-clock"></i>
+                                            @assignment.DayOfWeek: @assignment.StartTime - @assignment.EndTime
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="no-schedule">
+                                            <i class="fas fa-clock"></i> No schedule set
+                                        </span>
+                                    }
                                 </div>
                             </div>
                             <div>
-                                @if (assignment.Id > 0) // Only show remove for additional assignments
+                                @if (assignment.Id > 0)
                                 {
                                     <form method="post" action="@Url.Action("RemoveSectionFromProfessor", "Admin")" style="display: inline;">
                                         @Html.AntiForgeryToken()
@@ -349,7 +446,6 @@
         </div>
 
         <!-- Add New Section Assignment -->
-        <!-- Add New Section Assignment -->
         <div class="add-section-form">
             <h3 style="margin: 0 0 25px 0; color: #1f2937;">
                 <i class="fas fa-plus-circle"></i> Add New Section Assignment
@@ -363,7 +459,7 @@
 
             @if (isGrade123)
             {
-                <div class="alert alert-warning" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 8px;">
+                <div class="alert alert-warning">
                     <h4 style="margin: 0 0 10px 0; color: #856404;">
                         <i class="fas fa-exclamation-triangle"></i> Additional Assignments Not Allowed
                     </h4>
@@ -377,7 +473,7 @@
             }
             else
             {
-                <form method="post" action="@Url.Action("AddSectionToProfessor", "Admin")">
+                <form method="post" action="@Url.Action("AddSectionToProfessor", "Admin")" id="assignmentForm">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="professorId" value="@ViewBag.Professor.Id" />
 
@@ -390,7 +486,7 @@
                                 <option value="5">Grade 5</option>
                                 <option value="6">Grade 6</option>
                             </select>
-                            <small style="color: #dc3545; font-weight: 600; display: block; margin-top: 5px;">
+                            <small style="color: #dc3545; font-weight: 600;">
                                 Note: Only Grades 4-6 can have multiple professors
                             </small>
                         </div>
@@ -420,6 +516,58 @@
                         </div>
                     </div>
 
+                    <!-- NEW: Time Schedule Section -->
+                    <div class="time-schedule-section">
+                        <h4>
+                            <i class="fas fa-clock"></i> Class Schedule (Optional)
+                        </h4>
+                        <p>
+                            <i class="fas fa-info-circle"></i> Specify the class schedule to prevent time conflicts with other professors teaching the same section
+                        </p>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-day"></i> Day(s) of Week</label>
+                                <select name="dayOfWeek" id="dayOfWeekSelect" class="form-control">
+                                    <option value="">-- Select Day(s) --</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Monday,Wednesday,Friday">Monday, Wednesday, Friday</option>
+                                    <option value="Tuesday,Thursday">Tuesday, Thursday</option>
+                                </select>
+                                <small>Select which day(s) this class meets</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-clock"></i> Start Time</label>
+                                <input type="time" name="startTime" id="startTimeInput" class="form-control" />
+                                <small>Class start time (e.g., 08:00)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-clock"></i> End Time</label>
+                                <input type="time" name="endTime" id="endTimeInput" class="form-control" />
+                                <small>Class end time (e.g., 09:00)</small>
+                            </div>
+                        </div>
+
+                        <div id="schedulePreview" class="schedule-preview">
+                            <strong>
+                                <i class="fas fa-calendar-check"></i> Schedule Preview:
+                            </strong>
+                            <span id="scheduleText"></span>
+                        </div>
+
+                        <div class="schedule-note">
+                            <small>
+                                <i class="fas fa-exclamation-triangle"></i> <strong>Note:</strong> If you fill in any schedule field, you must complete all three fields (Day, Start Time, End Time). The system will check for time conflicts automatically.
+                            </small>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Add Section Assignment
                     </button>
@@ -435,11 +583,17 @@
     const subjectGroup = document.getElementById('subjectGroup');
     const subjectSelect = document.getElementById('subjectSelect');
 
+    // NEW: Schedule preview elements
+    const dayOfWeekSelect = document.getElementById('dayOfWeekSelect');
+    const startTimeInput = document.getElementById('startTimeInput');
+    const endTimeInput = document.getElementById('endTimeInput');
+    const schedulePreview = document.getElementById('schedulePreview');
+    const scheduleText = document.getElementById('scheduleText');
+
     if (gradeSelect) {
-        gradeSelect.addEventListener('change', function() {
+        gradeSelect.addEventListener('change', function () {
             const gradeLevel = parseInt(this.value);
 
-            // Always show section and subject for grades 4-6
             if (gradeLevel >= 4 && gradeLevel <= 6) {
                 sectionGroup.style.display = 'block';
                 subjectGroup.style.display = 'block';
@@ -452,5 +606,49 @@
             }
         });
     }
-</script>
 
+    // NEW: Schedule preview functionality
+    function updateSchedulePreview() {
+        const day = dayOfWeekSelect.value;
+        const start = startTimeInput.value;
+        const end = endTimeInput.value;
+
+        if (day && start && end) {
+            schedulePreview.style.display = 'block';
+            scheduleText.textContent = `${day}, ${start} - ${end}`;
+        } else {
+            schedulePreview.style.display = 'none';
+        }
+    }
+
+    if (dayOfWeekSelect) {
+        dayOfWeekSelect.addEventListener('change', updateSchedulePreview);
+    }
+    if (startTimeInput) {
+        startTimeInput.addEventListener('change', updateSchedulePreview);
+    }
+    if (endTimeInput) {
+        endTimeInput.addEventListener('change', updateSchedulePreview);
+    }
+
+    // Form validation
+    document.getElementById('assignmentForm')?.addEventListener('submit', function (e) {
+        const day = dayOfWeekSelect.value;
+        const start = startTimeInput.value;
+        const end = endTimeInput.value;
+
+        // If any time field is filled, all must be filled
+        if ((day || start || end) && !(day && start && end)) {
+            e.preventDefault();
+            alert('?? If you specify a schedule, you must fill in all time fields (Day, Start Time, and End Time).');
+            return false;
+        }
+
+        // Validate that end time is after start time
+        if (start && end && start >= end) {
+            e.preventDefault();
+            alert('?? End time must be after start time.');
+            return false;
+        }
+    });
+</script>

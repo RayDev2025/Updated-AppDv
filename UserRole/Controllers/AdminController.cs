@@ -927,10 +927,65 @@ namespace UserRoles.Controllers
             return View();
         }
 
+        private async Task<bool> HasTimeConflict(string gradeLevel, int section, string startTime, string endTime, string dayOfWeek, string professorId = null)
+        {
+            if (string.IsNullOrEmpty(startTime) || string.IsNullOrEmpty(endTime) || string.IsNullOrEmpty(dayOfWeek))
+            {
+                return false; // No time specified, no conflict checking needed
+            }
+
+            // Get all assignments for this grade and section
+            var existingAssignments = await _context.ProfessorSectionAssignments
+                .Where(a => a.GradeLevel == gradeLevel &&
+                           a.Section == section &&
+                           a.StartTime != null &&
+                           a.EndTime != null &&
+                           (professorId == null || a.ProfessorId != professorId))
+                .ToListAsync();
+
+            var newStart = TimeSpan.Parse(startTime);
+            var newEnd = TimeSpan.Parse(endTime);
+
+            foreach (var assignment in existingAssignments)
+            {
+                // Check if days overlap
+                if (!string.IsNullOrEmpty(assignment.DayOfWeek))
+                {
+                    var existingDays = assignment.DayOfWeek.Split(',').Select(d => d.Trim()).ToList();
+                    var newDays = dayOfWeek.Split(',').Select(d => d.Trim()).ToList();
+
+                    bool daysOverlap = existingDays.Any(d => newDays.Contains(d));
+
+                    if (daysOverlap)
+                    {
+                        var existingStart = TimeSpan.Parse(assignment.StartTime);
+                        var existingEnd = TimeSpan.Parse(assignment.EndTime);
+
+                        // Check if times overlap
+                        bool timesOverlap = (newStart < existingEnd && newEnd > existingStart);
+
+                        if (timesOverlap)
+                        {
+                            return true; // Conflict found
+                        }
+                    }
+                }
+            }
+
+            return false; // No conflict
+        }
+
         // Add Section to Professor
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddSectionToProfessor(string professorId, string gradeLevel, int section, string? subject)
+        public async Task<IActionResult> AddSectionToProfessor(
+    string professorId,
+    string gradeLevel,
+    int section,
+    string? subject,
+    string? startTime,
+    string? endTime,
+    string? dayOfWeek)
         {
             var role = HttpContext.Session.GetString("Role");
             if (role != "admin")
@@ -950,6 +1005,48 @@ namespace UserRoles.Controllers
             {
                 TempData["Error"] = $"Cannot add additional sections for Grade {gradeLevel}. Grades 1-3 can only have ONE professor who handles ALL sections and subjects for that grade.";
                 return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+            }
+
+            // Validate time fields - if any time field is filled, all must be filled
+            bool hasAnyTimeField = !string.IsNullOrEmpty(startTime) || !string.IsNullOrEmpty(endTime) || !string.IsNullOrEmpty(dayOfWeek);
+            bool hasAllTimeFields = !string.IsNullOrEmpty(startTime) && !string.IsNullOrEmpty(endTime) && !string.IsNullOrEmpty(dayOfWeek);
+
+            if (hasAnyTimeField && !hasAllTimeFields)
+            {
+                TempData["Error"] = "If you specify a schedule, you must fill in all time fields (Day, Start Time, and End Time).";
+                return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+            }
+
+            // Validate that end time is after start time
+            if (!string.IsNullOrEmpty(startTime) && !string.IsNullOrEmpty(endTime))
+            {
+                try
+                {
+                    var start = TimeSpan.Parse(startTime);
+                    var end = TimeSpan.Parse(endTime);
+
+                    if (start >= end)
+                    {
+                        TempData["Error"] = "End time must be after start time.";
+                        return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+                    }
+                }
+                catch
+                {
+                    TempData["Error"] = "Invalid time format. Please use HH:mm format (e.g., 08:00).";
+                    return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+                }
+            }
+
+            // Check for time conflicts
+            if (hasAllTimeFields)
+            {
+                bool hasConflict = await HasTimeConflict(gradeLevel, section, startTime, endTime, dayOfWeek, professorId);
+                if (hasConflict)
+                {
+                    TempData["Error"] = $"⚠️ Time conflict detected! Another professor already has a class scheduled for Grade {gradeLevel} - Section {section} during this time period ({dayOfWeek}: {startTime} - {endTime}).";
+                    return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+                }
             }
 
             // Check if assignment already exists in ProfessorSectionAssignments
@@ -1011,13 +1108,20 @@ namespace UserRoles.Controllers
                 GradeLevel = gradeLevel,
                 Section = section,
                 Subject = subject,
-                AssignedRoom = assignedRoom
+                AssignedRoom = assignedRoom,
+                StartTime = startTime,
+                EndTime = endTime,
+                DayOfWeek = dayOfWeek
             };
 
             _context.ProfessorSectionAssignments.Add(assignment);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Professor has been assigned to Grade {gradeLevel} - Section {section}.";
+            string scheduleInfo = hasAllTimeFields
+                ? $" ({dayOfWeek}: {startTime} - {endTime})"
+                : "";
+
+            TempData["Success"] = $"Professor has been assigned to Grade {gradeLevel} - Section {section}{scheduleInfo}.";
             return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
         }
 
