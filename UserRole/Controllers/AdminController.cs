@@ -587,7 +587,7 @@ namespace UserRoles.Controllers
                 // Grades 1-3: Only one professor per grade (no section, no subject)
                 if (gradeLevel >= 1 && gradeLevel <= 3)
                 {
-                    // Check if grade already has a professor
+                    // Check if grade already has a professor (in Users table)
                     var existingProfessor = await _context.Users
                         .FirstOrDefaultAsync(u => u.Role == "professor" &&
                                                  u.AssignedGradeLevel == model.GradeLevel);
@@ -595,7 +595,19 @@ namespace UserRoles.Controllers
                     if (existingProfessor != null)
                     {
                         ModelState.AddModelError("GradeLevel",
-                            $"Grade {model.GradeLevel} already has an assigned professor: {existingProfessor.FullName}. Only one professor is allowed per grade for grades 1-3.");
+                            $"Grade {model.GradeLevel} already has an assigned professor: {existingProfessor.FullName}. Only ONE professor is allowed for grades 1-3 (they handle all sections and subjects).");
+                        return View(model);
+                    }
+
+                    // Also check ProfessorSectionAssignments table
+                    var existingAssignment = await _context.ProfessorSectionAssignments
+                        .FirstOrDefaultAsync(a => a.GradeLevel == model.GradeLevel);
+
+                    if (existingAssignment != null)
+                    {
+                        var assignedProf = await _context.Users.FindAsync(existingAssignment.ProfessorId);
+                        ModelState.AddModelError("GradeLevel",
+                            $"Grade {model.GradeLevel} already has an assigned professor: {assignedProf?.FullName}. Only ONE professor is allowed for grades 1-3.");
                         return View(model);
                     }
 
@@ -733,7 +745,7 @@ namespace UserRoles.Controllers
                 // Grades 1-3: Only one professor per grade (no section, no subject)
                 if (gradeLevel >= 1 && gradeLevel <= 3)
                 {
-                    // Check if grade already has another professor
+                    // Check if grade already has another professor (in Users table)
                     var existingProfessor = await _context.Users
                         .FirstOrDefaultAsync(u => u.Role == "professor" &&
                                                  u.AssignedGradeLevel == model.GradeLevel &&
@@ -742,7 +754,20 @@ namespace UserRoles.Controllers
                     if (existingProfessor != null)
                     {
                         ModelState.AddModelError("GradeLevel",
-                            $"Grade {model.GradeLevel} already has an assigned professor: {existingProfessor.FullName}. Only one professor is allowed per grade for grades 1-3.");
+                            $"Grade {model.GradeLevel} already has an assigned professor: {existingProfessor.FullName}. Only ONE professor is allowed for grades 1-3 (they handle all sections and subjects).");
+                        return View(model);
+                    }
+
+                    // Check ProfessorSectionAssignments table
+                    var existingAssignment = await _context.ProfessorSectionAssignments
+                        .FirstOrDefaultAsync(a => a.GradeLevel == model.GradeLevel &&
+                                                 a.ProfessorId != model.Id);
+
+                    if (existingAssignment != null)
+                    {
+                        var assignedProf = await _context.Users.FindAsync(existingAssignment.ProfessorId);
+                        ModelState.AddModelError("GradeLevel",
+                            $"Grade {model.GradeLevel} already has an assigned professor: {assignedProf?.FullName}. Only ONE professor is allowed for grades 1-3.");
                         return View(model);
                     }
 
@@ -920,6 +945,12 @@ namespace UserRoles.Controllers
             }
 
             int grade = int.Parse(gradeLevel);
+
+            if (grade >= 1 && grade <= 3)
+            {
+                TempData["Error"] = $"Cannot add additional sections for Grade {gradeLevel}. Grades 1-3 can only have ONE professor who handles ALL sections and subjects for that grade.";
+                return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+            }
 
             // Check if assignment already exists in ProfessorSectionAssignments
             var existing = await _context.ProfessorSectionAssignments

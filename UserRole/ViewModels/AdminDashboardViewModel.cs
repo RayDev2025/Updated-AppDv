@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using UserRoles.Controllers;
 using UserRoles.Models;
 
 namespace UserRoles.ViewModels
@@ -133,5 +134,8 @@ namespace UserRoles.ViewModels
         public List<Enrollment> Students { get; set; } = new();
         public ClassScheduleViewModel ClassSchedule { get; set; } = new();
         public int TotalStudents { get; set; }
+
+        // NEW: List of all assignments
+        public List<UserRoles.Controllers.ProfessorAssignmentInfo> Assignments { get; set; } = new();
     }
 }

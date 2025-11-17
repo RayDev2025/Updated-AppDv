@@ -40,34 +40,74 @@ namespace UserRoles.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var gradeLevel = user.AssignedGradeLevel;
-            var section = user.AssignedSection;
+            // Get all section assignments for this professor
+            var allAssignments = new List<ProfessorAssignmentInfo>();
 
-            if (string.IsNullOrEmpty(gradeLevel))
+            // Add primary assignment if exists
+            if (!string.IsNullOrEmpty(user.AssignedGradeLevel))
             {
-                ViewBag.Error = "No grade level assigned. Please contact administrator.";
-                return View(new ProfessorDashboardViewModel());
+                var primaryAssignment = new ProfessorAssignmentInfo
+                {
+                    GradeLevel = user.AssignedGradeLevel,
+                    Section = user.AssignedSection ?? 0,
+                    Subject = user.AssignedSubject ?? "All Subjects",
+                    Room = user.AssignedRoom ?? "No room assigned",
+                    IsPrimary = true
+                };
+                allAssignments.Add(primaryAssignment);
             }
 
-            var students = await _context.Enrollments
-                .Include(e => e.User)
-                .Where(e => e.GradeLevel == gradeLevel &&
-                           e.Section == section &&
-                           e.Status == "approved")
-                .OrderBy(e => e.StudentName)
+            // Get additional assignments from ProfessorSectionAssignments table
+            var additionalAssignments = await _context.ProfessorSectionAssignments
+                .Where(a => a.ProfessorId == user.Id)
+                .Select(a => new ProfessorAssignmentInfo
+                {
+                    GradeLevel = a.GradeLevel,
+                    Section = a.Section,
+                    Subject = a.Subject ?? "All Subjects",
+                    Room = a.AssignedRoom ?? "No room assigned",
+                    IsPrimary = false
+                })
                 .ToListAsync();
 
-            var schedule = GetClassSchedule(gradeLevel);
+            allAssignments.AddRange(additionalAssignments);
+
+            // Get all students from all assigned sections
+            var allStudents = new List<Enrollment>();
+            foreach (var assignment in allAssignments)
+            {
+                var students = await _context.Enrollments
+                    .Include(e => e.User)
+                    .Where(e => e.GradeLevel == assignment.GradeLevel &&
+                               e.Section == assignment.Section &&
+                               e.Status == "approved")
+                    .ToListAsync();
+
+                // Avoid duplicate students
+                foreach (var student in students)
+                {
+                    if (!allStudents.Any(s => s.Id == student.Id))
+                    {
+                        allStudents.Add(student);
+                    }
+                }
+            }
+
+            // Get schedule from primary assignment
+            var schedule = allAssignments.FirstOrDefault()?.GradeLevel != null
+                ? GetClassSchedule(allAssignments.First().GradeLevel)
+                : new ClassScheduleViewModel();
 
             var viewModel = new ProfessorDashboardViewModel
             {
                 ProfessorName = user.FullName,
-                GradeLevel = gradeLevel,
-                Section = section ?? 0,
-                AssignedRoom = user.AssignedRoom ?? "No room assigned", // NEW
-                Students = students,
+                GradeLevel = user.AssignedGradeLevel ?? "Not Assigned",
+                Section = user.AssignedSection ?? 0,
+                AssignedRoom = user.AssignedRoom ?? "No room assigned",
+                Students = allStudents.OrderBy(s => s.GradeLevel).ThenBy(s => s.Section).ThenBy(s => s.StudentName).ToList(),
                 ClassSchedule = schedule,
-                TotalStudents = students.Count
+                TotalStudents = allStudents.Count,
+                Assignments = allAssignments.OrderBy(a => a.GradeLevel).ThenBy(a => a.Section).ToList()
             };
 
             return View(viewModel);
@@ -88,15 +128,39 @@ namespace UserRoles.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            // Check if student is in any of professor's assigned sections
             var student = await _context.Enrollments
                 .Include(e => e.User)
-                .FirstOrDefaultAsync(e => e.Id == id &&
-                                         e.GradeLevel == user.AssignedGradeLevel &&
-                                         e.Section == user.AssignedSection);
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (student == null)
             {
-                TempData["Error"] = "Student not found or not in your section.";
+                TempData["Error"] = "Student not found.";
+                return RedirectToAction(nameof(Dashboard));
+            }
+
+            // Verify professor has access to this student
+            var hasAccess = false;
+
+            // Check primary assignment
+            if (student.GradeLevel == user.AssignedGradeLevel &&
+                student.Section == user.AssignedSection)
+            {
+                hasAccess = true;
+            }
+
+            // Check additional assignments
+            if (!hasAccess)
+            {
+                hasAccess = await _context.ProfessorSectionAssignments
+                    .AnyAsync(a => a.ProfessorId == user.Id &&
+                                  a.GradeLevel == student.GradeLevel &&
+                                  a.Section == student.Section);
+            }
+
+            if (!hasAccess)
+            {
+                TempData["Error"] = "You don't have access to view this student.";
                 return RedirectToAction(nameof(Dashboard));
             }
 
@@ -121,5 +185,15 @@ namespace UserRoles.Controllers
                 Shift = isMorningShift ? "Morning" : "Afternoon"
             };
         }
+    }
+
+    // Helper class for assignment info
+    public class ProfessorAssignmentInfo
+    {
+        public string GradeLevel { get; set; }
+        public int Section { get; set; }
+        public string Subject { get; set; }
+        public string Room { get; set; }
+        public bool IsPrimary { get; set; }
     }
 }
