@@ -1,0 +1,271 @@
+﻿@model UserRoles.ViewModels.EnrollStudentViewModel
+@{
+    ViewData["Title"] = "Enroll Student";
+    var gradeLevel = int.Parse(Model.GradeLevel);
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+    }
+
+    body {
+        background: #f8fafc;
+    }
+
+    .page-container {
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .page-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 10px 0;
+        }
+
+    .enroll-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .student-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+
+        .student-info h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+        }
+
+        .student-info p {
+            margin: 5px 0;
+            opacity: 0.95;
+        }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+        .form-section h3 {
+            color: #1f2937;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+    .subject-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+
+    .subject-label {
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .form-select {
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+    }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+    .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        color: #1e40af;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1.05em;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-success {
+        background: var(--success);
+        color: white;
+        width: 100%;
+        justify-content: center;
+    }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+        width: 100%;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+    .form-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 30px;
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <h1><i class="fas fa-user-graduate"></i> Enroll Student</h1>
+        <p style="color: #64748b;">Assign professors to subjects for this student</p>
+    </div>
+
+    <div class="enroll-card">
+        <div class="student-info">
+            <h3><i class="fas fa-id-card"></i> Student Information</h3>
+            <p><strong>Name:</strong> @Model.StudentName</p>
+            <p><strong>Grade Level:</strong> Grade @Model.GradeLevel - Section @Model.Section</p>
+            <p><strong>Parent/Guardian:</strong> @Model.ParentName</p>
+            <p><strong>Contact:</strong> @Model.ContactNumber</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            </div>
+        }
+
+        @if (gradeLevel >= 1 && gradeLevel <= 3)
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Grades 1-3:</strong> One professor teaches all subjects to this student.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Grades 4-6:</strong> Assign a professor for each subject.
+            </div>
+        }
+
+        <form asp-action="EnrollStudent" method="post">
+            <input type="hidden" asp-for="EnrollmentId" />
+
+            <div class="form-section">
+                <h3><i class="fas fa-chalkboard-teacher"></i> Professor Assignments</h3>
+
+                @if (gradeLevel >= 1 && gradeLevel <= 3)
+                {
+                    <div class="subject-row">
+                        <div class="subject-label">
+                            <i class="fas fa-book"></i> All Subjects
+                        </div>
+                        <select name="SingleProfessorId" class="form-select" required>
+                            <option value="">-- Select Professor --</option>
+                            @foreach (var prof in Model.AvailableProfessors.GetValueOrDefault("All Subjects", new List<ProfessorOption>()))
+                            {
+                                <option value="@prof.Id">@prof.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    @if (!Model.AvailableProfessors.GetValueOrDefault("All Subjects", new List<ProfessorOption>()).Any())
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Warning:</strong> No professor assigned to Grade @Model.GradeLevel yet. Please assign a professor first in the Professor Management section.
+                        </div>
+                    }
+                }
+                else
+                {
+                    @foreach (var subject in new[] { "Math", "Science", "English", "Filipino", "Social Studies", "MAPEH" })
+                    {
+                        <div class="subject-row">
+                            <div class="subject-label">
+                                <i class="fas fa-book-open"></i> @subject
+                            </div>
+                            <select name="SubjectProfessors[@subject]" class="form-select" required>
+                                <option value="">-- Select Professor --</option>
+                                @foreach (var prof in Model.AvailableProfessors.GetValueOrDefault(subject, new List<ProfessorOption>()))
+                                {
+                                    <option value="@prof.Id">@prof.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        @if (!Model.AvailableProfessors.GetValueOrDefault(subject, new List<ProfessorOption>()).Any())
+                        {
+                            <div class="alert alert-warning" style="margin-top: -10px; margin-bottom: 20px;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Warning:</strong> No professor assigned to teach @subject for Grade @Model.GradeLevel - Section @Model.Section.
+                            </div>
+                        }
+                    }
+                }
+            </div>
+
+            <div class="form-actions">
+                <a href="@Url.Action("ViewStudents", "Admin")" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> Enroll Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

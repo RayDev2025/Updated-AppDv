@@ -382,13 +382,14 @@
                                     <div class="action-buttons">
                                         @if (student.Status == "pending")
                                         {
-                                            <button class="btn btn-success" onclick="showAcceptModal(@student.Id, '@student.StudentName')">
-                                                <i class="fas fa-check"></i> Accept
+                                            <button class="btn btn-success" onclick="window.location.href='@Url.Action("EnrollStudent", "Admin", new { id = student.Id })'">
+                                                <i class="fas fa-user-graduate"></i> Enroll
                                             </button>
                                             <button class="btn btn-danger" onclick="showDeclineModal(@student.Id, '@student.StudentName')">
                                                 <i class="fas fa-times"></i> Decline
                                             </button>
                                         }
+
                                         else if (student.Status == "approved" && !student.Section.HasValue)
                                         {
                                             <a href="@Url.Action("ReassignStudent", "Admin", new { id = student.Id })" class="btn btn-warning">

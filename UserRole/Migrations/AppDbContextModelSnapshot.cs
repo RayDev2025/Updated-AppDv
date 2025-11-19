@@ -216,7 +216,7 @@ namespace UserRole.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Enrollments");
+                    b.ToTable("Enrollments", (string)null);
                 });
 
             modelBuilder.Entity("UserRoles.Models.SectionCapacity", b =>
@@ -233,7 +233,7 @@ namespace UserRole.Migrations
 
                     b.HasKey("GradeLevel");
 
-                    b.ToTable("SectionCapacities");
+                    b.ToTable("SectionCapacities", (string)null);
 
                     b.HasData(
                         new

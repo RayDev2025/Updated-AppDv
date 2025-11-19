@@ -15,6 +15,8 @@ namespace UserRoles.Data
         public DbSet<SectionCapacity> SectionCapacities { get; set; }
         public DbSet<ProfessorSectionAssignment> ProfessorSectionAssignments { get; set; }
 
+        public DbSet<SubjectEnrollment> SubjectEnrollments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
