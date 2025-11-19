@@ -632,6 +632,34 @@ namespace UserRoles.Controllers
                         return View(model);
                     }
 
+                    // NEW: Check if this professor's email already exists with a different subject assignment
+                    var existingProfByEmail = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Email == model.Email && u.Role == "professor");
+
+                    if (existingProfByEmail != null)
+                    {
+                        // Professor already exists - check if they're trying to assign a different subject
+                        if (!string.IsNullOrEmpty(existingProfByEmail.AssignedSubject) &&
+                            existingProfByEmail.AssignedSubject != model.Subject)
+                        {
+                            ModelState.AddModelError("Email",
+                                $"This professor is already assigned to teach {existingProfByEmail.AssignedSubject}. A professor can only teach ONE subject across all grades and sections.");
+                            return View(model);
+                        }
+
+                        // Check in ProfessorSectionAssignments for different subjects
+                        var existingAssignmentWithDifferentSubject = await _context.ProfessorSectionAssignments
+                            .FirstOrDefaultAsync(a => a.ProfessorId == existingProfByEmail.Id &&
+                                                     a.Subject != model.Subject);
+
+                        if (existingAssignmentWithDifferentSubject != null)
+                        {
+                            ModelState.AddModelError("Subject",
+                                $"This professor is already assigned to teach {existingAssignmentWithDifferentSubject.Subject}. A professor can only teach ONE subject across all grades and sections.");
+                            return View(model);
+                        }
+                    }
+
                     // Check if this section already has a professor for this subject
                     var existingSubjectProfessor = await _context.Users
                         .FirstOrDefaultAsync(u => u.Role == "professor" &&
@@ -776,6 +804,7 @@ namespace UserRoles.Controllers
                     model.Subject = null;
                 }
                 // Grades 4-6: Up to 6 professors per section, each with different subjects
+                // Grades 4-6: Up to 6 professors per section, each with different subjects
                 else if (gradeLevel >= 4 && gradeLevel <= 6)
                 {
                     // Validate section is provided
@@ -789,6 +818,29 @@ namespace UserRoles.Controllers
                     if (string.IsNullOrEmpty(model.Subject))
                     {
                         ModelState.AddModelError("Subject", "Subject is required for grades 4-6.");
+                        return View(model);
+                    }
+
+                    // NEW: Check if professor is trying to change to a different subject
+                    var currentSubject = professor.AssignedSubject;
+                    var allProfessorAssignments = await _context.ProfessorSectionAssignments
+                        .Where(a => a.ProfessorId == model.Id)
+                        .Select(a => a.Subject)
+                        .ToListAsync();
+
+                    // If professor has existing assignments, check if they're trying to change subject
+                    if (!string.IsNullOrEmpty(currentSubject) && currentSubject != model.Subject)
+                    {
+                        ModelState.AddModelError("Subject",
+                            $"This professor is already assigned to teach {currentSubject}. A professor can only teach ONE subject. If you want to change their subject, you must first remove all their current assignments.");
+                        return View(model);
+                    }
+
+                    if (allProfessorAssignments.Any() && allProfessorAssignments.Any(s => s != model.Subject))
+                    {
+                        var existingSubject = allProfessorAssignments.First(s => s != model.Subject);
+                        ModelState.AddModelError("Subject",
+                            $"This professor is already assigned to teach {existingSubject} in other sections. A professor can only teach ONE subject. If you want to change their subject, you must first remove all their current assignments.");
                         return View(model);
                     }
 
@@ -1069,6 +1121,7 @@ namespace UserRoles.Controllers
             }
 
             // For grades 4-6, check subject conflicts
+            // For grades 4-6, check subject conflicts
             if (grade >= 4 && grade <= 6)
             {
                 if (string.IsNullOrEmpty(subject))
@@ -1077,26 +1130,49 @@ namespace UserRoles.Controllers
                     return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
                 }
 
-                // Check if another professor already teaches this subject in this section (in assignments table)
-                var subjectConflictInAssignments = await _context.ProfessorSectionAssignments
-                    .AnyAsync(a => a.GradeLevel == gradeLevel &&
-                                 a.Section == section &&
-                                 a.Subject == subject &&
-                                 a.ProfessorId != professorId);
+                // NEW: Check if professor is trying to teach a different subject
+                var professorCurrentSubject = professor.AssignedSubject;
+                var allProfessorAssignments = await _context.ProfessorSectionAssignments
+                    .Where(a => a.ProfessorId == professorId)
+                    .Select(a => a.Subject)
+                    .ToListAsync();
 
-                // Also check in Users table (primary assignments)
-                var subjectConflictInUsers = await _context.Users
-                    .AnyAsync(u => u.Role == "professor" &&
-                                 u.AssignedGradeLevel == gradeLevel &&
-                                 u.AssignedSection == section &&
-                                 u.AssignedSubject == subject &&
-                                 u.Id != professorId);
-
-                if (subjectConflictInAssignments || subjectConflictInUsers)
+                // If professor has a primary subject, new assignment must be the same subject
+                if (!string.IsNullOrEmpty(professorCurrentSubject) && professorCurrentSubject != subject)
                 {
-                    TempData["Error"] = $"Another professor is already assigned to Grade {gradeLevel} - Section {section} for {subject}.";
+                    TempData["Error"] = $"This professor is already assigned to teach {professorCurrentSubject}. A professor can only teach ONE subject across all grades and sections.";
                     return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
                 }
+
+                // If professor has other assignments, check they're all the same subject
+                if (allProfessorAssignments.Any() && allProfessorAssignments.Any(s => s != subject))
+                {
+                    var existingSubject = allProfessorAssignments.First(s => s != subject);
+                    TempData["Error"] = $"This professor is already assigned to teach {existingSubject} in other sections. A professor can only teach ONE subject across all grades and sections.";
+                    return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+                }
+
+                // Check if another professor already teaches this subject in this section (in assignments table)
+               // Check if another professor already teaches this subject in this section (in assignments table)
+var subjectConflictInAssignments = await _context.ProfessorSectionAssignments
+    .AnyAsync(a => a.GradeLevel == gradeLevel &&
+                 a.Section == section &&
+                 a.Subject == subject &&
+                 a.ProfessorId != professorId);
+
+// Also check in Users table (primary assignments)
+var subjectConflictInUsers = await _context.Users
+    .AnyAsync(u => u.Role == "professor" &&
+                 u.AssignedGradeLevel == gradeLevel &&
+                 u.AssignedSection == section &&
+                 u.AssignedSubject == subject &&
+                 u.Id != professorId);
+
+if (subjectConflictInAssignments || subjectConflictInUsers)
+{
+    TempData["Error"] = $"Another professor is already assigned to Grade {gradeLevel} - Section {section} for {subject}.";
+    return RedirectToAction(nameof(ManageProfessorSections), new { id = professorId });
+}
             }
 
             // Get room assignment

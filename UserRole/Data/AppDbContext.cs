@@ -19,7 +19,6 @@ namespace UserRoles.Data
         {
             base.OnModelCreating(builder);
 
-            // ADD THIS: Seed section capacity data for grades 1-6
             builder.Entity<SectionCapacity>().HasData(
                 new SectionCapacity { GradeLevel = "1", CurrentSection = 1, StudentsInCurrentSection = 0 },
                 new SectionCapacity { GradeLevel = "2", CurrentSection = 1, StudentsInCurrentSection = 0 },
